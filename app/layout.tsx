@@ -15,6 +15,20 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Eric - Software Engineer",
   description: "This portfolio was created and used by Eric Delos Reyes for career purposes.",
+  openGraph: {
+    title: "Eric - Software Engineer",
+    description: "Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — thericodere@gmail.com",
+    url: "https://ericdelosreyes.com/",
+    type: "website",
+    images: [
+      {
+        url: "https://ericdelosreyes.com/images/DelosReyes.png", // your share image
+        width: 1200,
+        height: 630,
+        alt: "Eric Delos Reyes Portfolio"
+      }
+    ]
+  },
 };
 
 
