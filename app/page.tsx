@@ -82,8 +82,8 @@ export default function Home() {
     <div className="text-gray-500 min-h-screen">
       <header className={` border-b border-gray-500/30 ${navThemeBG} backdrop-blur-sm font-mono text-sm py-4 px-20 fixed top-0 right-0 left-0 z-50`}>
         <nav className="flex justify-between items-center ">
-          <a type="" href="#" className="uppercase text-cyan-500 text-lg font-bold text-glow-cyan [word-spacing:-0.4em]" >
-            &lt;Eric Delos Reyes/&gt;
+          <a type="" href="#" className={`uppercase ${themeFont} text-lg font-bold  [word-spacing:-0.4em]`} >
+            Eric Delos Reyes
           </a>
           <div className="flex justify-end items-center gap-10 ">
             {allNav.map((nav, index) => (
