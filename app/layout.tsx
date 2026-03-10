@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eric",
+  title: "Eric - Software Engineer",
   description: "This portfolio was created and used by Eric Delos Reyes for career purposes.",
 };
 

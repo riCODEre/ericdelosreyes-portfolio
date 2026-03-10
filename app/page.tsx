@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote } from "lucide-react";
 import Image from 'next/image'
-import { allWorkExp, allSkill, allProjects, allCert, allReco } from "./data"
+import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
 import { Cert, Project, WorkExp } from './type'
 
 
@@ -72,7 +72,7 @@ export default function Home() {
     else{
       return (
         <Moon size={18}></Moon>
-      )
+      ) 
     }
   }
 
@@ -85,11 +85,13 @@ export default function Home() {
           <a type="" href="#" className="uppercase text-cyan-500 text-lg font-bold text-glow-cyan [word-spacing:-0.4em]" >
             &lt;Eric Delos Reyes/&gt;
           </a>
-          <div className="flex justify-end items-center gap-10 bg-">
-            <NavLink link="#about" number="01" text="About"></NavLink>
-            <NavLink link="#experience" number="02" text="Experience"></NavLink>
-            <NavLink link="#About" number="03" text="Projects"></NavLink>
-            <NavLink link="#About" number="03" text="Contact"></NavLink>
+          <div className="flex justify-end items-center gap-10 ">
+            {allNav.map((nav, index) => (
+              <a key={index} href={nav.link} className="space-x-2 hover:text-cyan-500">
+                {nav.name}
+              </a>
+            ))}
+            
             <button className="cursor-pointer border hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)] border-cyan-500/40 p-2 transition-all duration-300" onClick={toggleTheme}>
               <ThemeButton/>
             </button>
@@ -266,18 +268,18 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/* For tech stack */}
-        <section id="stack" className={`pb-20 relative min-h-screen flex flex-col justify-center space-y-7 items-start px-20 ${themeBG} `}>
+        {/* For skills */}
+        <section id="skills" className={`pb-20 relative min-h-screen flex flex-col justify-center space-y-7 items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
               <span className="text-rose-400 text-glow-rose ">3.</span>
-              <span className={`${themeFont}`}>Tech_Stack</span>
+              <span className={`${themeFont}`}>Skills</span>
             </h2>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] w-full gap-4">
             {allSkill.map((allSkill, index) => (
-              <div key={index} className="flex-1 border border-cyan-400/40 p-10 bg-cyan-100/5 space-y-3">
+              <div key={index} className="flex-1 border border-cyan-400/40 bg-glow-cyan p-10 bg-cyan-100/5 space-y-3">
                 <h3 className="uppercase text-rose-500 font-bold">// {allSkill.title}</h3>
                 <ul key={index} className="space-y-4">
                   {allSkill.skillSet.map((name, index) => (
@@ -297,7 +299,7 @@ export default function Home() {
           </div>
         </section>
         {/* For projects */}
-        <section id="project" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="projects" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
@@ -307,11 +309,11 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 w-full mt-4 gap-4">
             {allProjects.map((project, index) => (
-              <div key={index} className="p-8 w-full space-y-4 border border-cyan-400/40 bg-cyan-100/5">
+              <div key={index} className="p-8 w-full space-y-4 border border-cyan-400/40 bg-glow-cyan bg-cyan-100/5">
                 <div className="flex justify-between">
                   <h4 className="text-xl text-cyan-400 font-bold space-x-3">
                     <span>{project.title}</span> 
-                    <span className="text-sm rounded-tl-xl rounded-br-xl text-rose-500 px-2 py-0.5 border border-rose-500/30">{project.type}</span>
+                    <span className="inline-block text-sm rounded-tl-xl rounded-br-xl text-rose-500 px-2 py-0.5 border border-rose-500/30 animate-pulse ">{project.type}</span>
                   </h4>
                   <a href={project.link} target="_blank">
                     <ExternalLink/>
@@ -334,7 +336,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Certification */}
-        <section id="certification" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="certifications" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
@@ -344,7 +346,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 w-full mt-10 gap-4">
             {allCert.map((cert, index) => (
-              <div key={index} className="p-5 w-full space-y-1 border border-cyan-400/40 bg-cyan-100/5">
+              <div key={index} className="p-5 w-full space-y-1 border bg-glow-cyan border-cyan-400/40 bg-cyan-100/5">
                 <Award size={30} className="text-rose-500"/>
                 <h4 className={`text-lg ${themeFont} font-bold`}>{cert.title}</h4>
                 <div className="text-sm">
@@ -362,7 +364,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Recommendation */}
-        <section id="recommendation" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="recommendations" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
@@ -372,7 +374,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 w-full mt-10 gap-4">
             {allReco.map((recommendation, index) => (
-              <div key={index} className="p-5 w-full space-y-4 border border-cyan-400/40 bg-cyan-100/5">
+              <div key={index} className="p-5 bg-glow-cyan w-full space-y-4 border border-cyan-400/40 bg-cyan-100/5">
                 <Quote size={25} className="text-cyan-500/40"/>
                 <p className="italic">"{recommendation.remark}"</p>
                 <div className="border-b border-cyan-500/10"></div>
@@ -391,16 +393,5 @@ export default function Home() {
       </main>
     </div>
     
-  )
-}
-
-
-function NavLink({link, number, text}: {link:string, number:string, text:string}){
-  
-  return (
-    <a href={link} className="space-x-2 hover:text-cyan-500">
-      <span className="text-rose-400">{number}.</span>
-      <span>{text}</span>
-    </a>
   )
 }

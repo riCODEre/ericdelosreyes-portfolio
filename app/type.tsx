@@ -36,3 +36,8 @@ export type Recommendation = {
     positionCompany: string
     remark: string 
 }
+
+export type Nav = {
+    name: string
+    link: string
+}

@@ -111,3 +111,13 @@ h1,h2,h3,h4,h5{
 .text-glow-rose {
     text-shadow: rgba(255, 41, 112, 0.8) 0px 0px 10px, rgba(255, 41, 112, 0.4) 0px 0px 30px, rgba(255, 41, 112, 0.2) 0px 0px 60px;
 }
+
+.bg-glow-cyan {
+  @apply hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)]
+  
+}
+
+.bg-glow-rose {
+  @apply hover:shadow-[0_0_20px_5px_rgba(239,68,68,0.5)]
+  
+}

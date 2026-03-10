@@ -1,5 +1,5 @@
 
-import { Cert, Project, Skill, WorkExp, Recommendation } from './type'
+import { Cert, Project, Skill, WorkExp, Recommendation, Nav } from './type'
 
 
 
@@ -96,7 +96,6 @@ export const allWorkExp: WorkExp[] = [
         desc: [
             "Designed and developed web-based Data and Entity Management Systems, managing end-to-end data processing, storage, validation, and reporting.", 
             "Planned core application architecture, database workflows, and data processing pipelines while refining UI and optimizing performance.",
-            "Led front-end development of 11 role-based modules using React, Nest.js, JavaScript, and Chakra UI.",
             "Collaborated with junior and senior developers and partner clients on system planning, database design, and backend-frontend integration."
         ],
         skill: ["Apps Script", "React", "NestJS", "Vanilla JS", "Chakra UI", "Tailwind", "Github"]
@@ -109,8 +108,9 @@ export const allWorkExp: WorkExp[] = [
         date: "Dec 2025 - Present",
         company: "Sociofact",
         desc: [
-            "Leading development of scalable microservices and modern frontend applications. Architecting solutions for high-traffic systems.", 
-            "Leading development of scalable microservices and modern frontend applications. Architecting solutions for high-traffic systems."
+            "Reduced claim verification time to under 1 minute per item, automating a process that normally takes 30+ minutes manually.",
+            "Built a fully automated AI pipeline integrating Gemini for claim extraction and Perplexity for fact-checking, handling multi-modal content efficiently.",
+            "Scaled verification throughput, enabling batch processing of dozens of claims per run with high accuracy and minimal manual oversight."
         ],
         skill: ["Django", "Python", "Cloud Run", "Docker", "NeonDB", "Sentry", "AI Integration"]
     }
@@ -122,15 +122,15 @@ export const allProjects: Project[] = [
         id: 1,
         title: "Sociofact: AI-Integrated Content Verification System",
         type: "Startup",
-        desc: "Started a startup that offers an AI-integrated SaaS that verifies any outputs (text, images, videos) of content creators with the factual information attachable to their published post.",
+        desc: "Built an AI-powered SaaS content verification pipeline, reducing claim validation from 30+ minutes to under one minute while enabling high-throughput, accurate processing of multi-modal content.",
         link: "https://sociofact.com/",
-        skill: ["Django", "Gemini", "Perplexity", "Cloud Run", "Docker"]
+        skill: ["Django", "Gemini", "Perplexity", "Google Cloud Run", "NeonDB", "Docker"]
     },
     {
         id: 2,
         title: "Intern Management System",
         type: "Work",
-        desc: "Developed 11 system modules for a comprehensive intern management web application, collaborating with an intern developer and integrating back-end services with the UI. Contributed to system planning, database design, and cross-team coordination with junior and senior developers. Worked directly with the client to prepare and deliver the final system presentation to the executive management team.",
+        desc: "Developed 11 modules for a full-stack intern management web app, collaborating with team members, integrating back-end services with the UI, and delivering the final system to executives.",
         link: "https://res.cloudinary.com/dpkzrqq51/image/upload/v1765001794/6cfe4156-1d75-401a-a30b-91dce64bbe1c.png",
         skill: ["React", "JavaScript", "Chakra UI", "Nest.js"]
     },
@@ -138,10 +138,37 @@ export const allProjects: Project[] = [
         id: 3,
         title: "Data Management System",
         type: "Work",
-        desc: "Developed a monolithic data management web application using Google Apps Script with Google Sheets as the backend database. Implemented data upload, validation, filtering, editing, and full CRUD functionality across multiple modules, along with automated report generation and centralized data aggregation. Established the application architecture, database workflow, and optimized the UI and performance for efficient data processing and management.",
+        desc: "Developed a monolithic data management web application, implementing full CRUD, automated reporting, and optimized workflows across multiple modules for efficient data processing and management.",
         link: "https://res.cloudinary.com/dpkzrqq51/image/upload/v1765011755/4df1d163-ad20-42e9-ae84-d477f0a6f17a.png",
         skill: ["Apps Script", "Vanilla JS", "GSheet"]
     },
+    {
+        id: 4,
+        title: "EduScore: Professor Evaluation System",
+        type: "School",
+        desc: "Developed the backend of a student evaluation platform, completing the full project and software development lifecycle to enable teacher ratings and reviews that support academic planning.",
+        link: "https://github.com/riCODEre/EduScore",
+        skill: ["Python", "Django", "SQLite"]
+    },
+    {
+        id: 5,
+        title: "BeTrails: Org Management System",
+        type: "School",
+        desc: "Developed a school organization management system, enabling students to explore and join organizations while allowing officers to manage memberships, integrating full-stack web functionality.",
+        link: "https://github.com/riCODEre/Urbana_TheEnchants",
+        skill: ["Node.js", "Express.js", "SQLite", "TailwindCSS"]
+    },
+    {
+        id: 6,
+        title: "Embedded Projects Compilation",
+        type: "School",
+        desc: "Showcased a series of embedded projects, culminating in an automated fermentation incubator and IoT-enabled delivery locker, demonstrating hands-on experience in both hardware and software development.",
+        link: "https://github.com/riCODEre/EduScore",
+        skill: ["IoT", "Embedded System", "ESP32", "Arduino Nano", "Firebase RTDB"]
+    },
+    
+    
+
     
     
 ]
@@ -160,4 +187,33 @@ export const allReco: Recommendation[] = [
         positionCompany: "Sociofact",
         remark: "ahUlul"
     }
+]
+
+export const allNav: Nav[] = [
+    {
+        name: "About",
+        link: "#about"
+    },
+    {
+        name: "Experience",
+        link: "#experience"
+    },
+    {
+        name: "Skills",
+        link: "#skills"
+    },
+    {
+        name: "Projects",
+        link: "#projects"
+    },
+    {
+        name: "Certification",
+        link: "#certifications"
+    },
+    {
+        name: "Recommendation",
+        link: "#recommendations"
+    },
+
+
 ]
