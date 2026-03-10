@@ -24,8 +24,9 @@ body {
   @apply font-sans
 }
 
-h1,h2,h3,h4,h5{
-  @apply font-mono
+h1, h2, h3, h4, h5,
+h1 span, h2 span, h3 span, h4 span, h5 span {
+  @apply font-mono;
 }
 
 .scanline {

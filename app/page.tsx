@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote } from "lucide-react";
+import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote, Linkedin, Twitter, Mail, Facebook } from "lucide-react";
 import Image from 'next/image'
 import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
 import { Cert, Project, WorkExp } from './type'
@@ -102,8 +102,6 @@ export default function Home() {
         <div className="absolute inset-0 scanline pointer-events-none z-30"></div>
         {/* For hero section */}
         <section id="hero" className="relative min-h-screen">
-          
-          
           <div className="absolute inset-0">
             <img src="/images/heroimage.jpg" alt="" className="z-10 w-full h-full object-cover" />
           </div>
@@ -336,7 +334,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Certification */}
-        <section id="certifications" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="certifications" className={`relative pt-40 flex flex-col justify-center items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
@@ -364,7 +362,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Recommendation */}
-        <section id="recommendations" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="recommendations" className={`relative py-40 flex flex-col justify-center items-start px-20 ${themeBG} `}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
             <h2 className="text-4xl font-bold space-x-5 font-mono">
@@ -389,8 +387,41 @@ export default function Home() {
             
           </div>
         </section>
-        
+        <section id="recommendations" className={`relative py-20  flex flex-col justify-center items-start px-20 bg-black/90 `}>
+          <div className="flex flex-col w-full justify-center items-center space-y-10">
+            <div className="flex justify-center items-center space-x-4">
+              <div className="border-b border-cyan-400 w-8"></div>
+              <h2 className="text-4xl font-bold space-x-5 font-mono">
+                <span className="text-cyan-400 text-glow-cyan ">7.</span>
+                <span className={`text-white`}>Contact</span>
+              </h2>
+              <div className="border-b border-cyan-400 w-8"></div>
+            </div>
+            <p className="w-1/2 text-center">Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — my inbox is always open.</p>
+            <button className={`uppercase btn-primary ${themeFontRev} font-mono text-lg px-10 py-4 flex bg-glow-cyan`}>
+              Send_Message&#40;&#41;
+            </button>
+            <div className="flex justify-center items-center space-x-5 text-white/90">
+              <a href="https://github.com/riCODEre" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
+                <Github />
+              </a>
+              <a href="https://www.linkedin.com/in/ericcode" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
+                <Linkedin />
+              </a>
+              <a href="https://www.facebook.com/ricodere.711" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
+                <Facebook />
+              </a>
+              <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
+                <Mail />
+              </a>
+            </div>
+          </div>
+          
+        </section>
       </main>
+      <footer className="bg-black/95 border-t border-gray-700/80 py-5 flex justify-center items-center">
+        <p>© 2026 Eric Delos Reyes. All rights reserved.</p>
+      </footer>
     </div>
     
   )

@@ -183,9 +183,9 @@ export const allCert: Cert[] = [{
 
 export const allReco: Recommendation[] = [
     {
-        name: "Eric",
-        positionCompany: "Sociofact",
-        remark: "ahUlul"
+        name: "A.G.",
+        positionCompany: "IT Solutions Manager @ PFC - Aboitiz Foods Corp.",
+        remark: "Eric has the technical competence and independent problem-solving ability, with strong foundations in coding and documentation. Recommended to further enhance skills in JavaScript, AWS, and Agile practices."
     }
 ]
 
