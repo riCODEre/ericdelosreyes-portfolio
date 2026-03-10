@@ -10,18 +10,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-jetbrains-mono);
-}
 
+}
+/* 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   @apply font-sans
 }
 
@@ -31,4 +30,84 @@ h1,h2,h3,h4,h5{
 
 .scanline {
     background: repeating-linear-gradient(0deg,transparent,transparent 2px,hsl(185 100% 50% / .03) 2px,hsl(185 100% 50% / .03) 4px);
+}
+
+/* ---------- FULL BUTTONS ---------- */
+
+/* Primary Full */
+.btn-primary {
+  @apply bg-cyan-400 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply bg-cyan-600;
+  }
+
+  &:active {
+    @apply bg-cyan-700 shadow-inner scale-95; /* scale down 95% */
+  }
+
+  &:disabled {
+    @apply bg-cyan-300 cursor-not-allowed shadow-none;
+  }
+}
+
+/* Secondary Full */
+.btn-secondary {
+  @apply bg-rose-400 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply bg-rose-600;
+  }
+
+  &:active {
+    @apply bg-rose-700 shadow-inner scale-95; /* scale down 95% */
+  }
+
+  &:disabled {
+    @apply bg-rose-300 cursor-not-allowed shadow-none;
+  }
+}
+
+
+/* ---------- OUTLINE/BORDER BUTTONS ---------- */
+
+/* Primary Outline */
+.btn-primary-outline {
+  @apply bg-transparent border border-cyan-400 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply border-cyan-600; /* only border changes */
+  }
+
+  &:active {
+    @apply border-cyan-700 shadow-inner scale-95; /* border + scale */
+  }
+
+  &:disabled {
+    @apply border-cyan-300 cursor-not-allowed shadow-none;
+  }
+}
+
+/* Secondary Outline */
+.btn-secondary-outline {
+  @apply bg-transparent border border-rose-500 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply border-rose-600 ; /* only border changes */
+  }
+
+  &:active {
+    @apply border-rose-700 shadow-inner scale-95; /* border + scale */
+  }
+
+  &:disabled {
+    @apply border-rose-300 cursor-not-allowed shadow-none;
+  }
+}
+
+.text-glow-cyan {
+    text-shadow: rgba(0, 234, 255, 0.8) 0px 0px 10px, rgba(0, 234, 255, 0.4) 0px 0px 30px, rgba(0, 234, 255, 0.2) 0px 0px 60px;
+}
+.text-glow-rose {
+    text-shadow: rgba(255, 41, 112, 0.8) 0px 0px 10px, rgba(255, 41, 112, 0.4) 0px 0px 30px, rgba(255, 41, 112, 0.2) 0px 0px 60px;
 }

@@ -3,7 +3,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        myfont: ['var(--font-myfont)', 'sans-serif'],
+        space: ['var(--font-myfont)', 'sans-serif'],
       },
     },
   },
