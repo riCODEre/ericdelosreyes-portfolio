@@ -281,9 +281,9 @@ export default function Home() {
                 <h3 className="uppercase text-rose-500 font-bold">// {allSkill.title}</h3>
                 <ul key={index} className="space-y-4">
                   {allSkill.skillSet.map((name, index) => (
-                    <li key={index} className="flex items-start">
+                    <li key={index} className="flex items-start group">
                       <span>
-                        <Cpu className="w-5 h-5 text-cyan-400 mt-1 mr-4" />
+                        <Cpu className="w-5 h-5 text-cyan-400 group-hover:text-rose-500 mt-1 mr-4" />
                       </span>
                       <span className={`${themeFont}`}>
                         {name}
