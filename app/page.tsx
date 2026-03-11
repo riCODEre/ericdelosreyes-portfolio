@@ -66,6 +66,7 @@ export default function Home() {
   const themeBGColor:string = themeMode === 'light' ? 'white' : 'black'
   const navThemeBG:string = themeMode === 'light' ? 'bg-white/80' : 'bg-black/80'
   const menuThemeBG:string = themeMode === 'light' ? 'bg-white/90!' : 'bg-black/90!'
+  const themeBGHeroAbout:string = themeMode === 'light' ? 'from-white via-white to-transparent' : 'from-[#080A0C] via-[#080A0C] to-transparent'
 
   // functions
   function ThemeButton (){
@@ -135,6 +136,7 @@ export default function Home() {
             <img src="/images/heroimage.jpg" alt="" className="z-10 w-full h-full object-cover" />
           </div>
           <div className={` absolute z-20 ${heroThemeClasses} w-full h-full flex justify-between`}>
+          <div className={`absolute w-full bg-linear-to-t ${themeBGHeroAbout} h-1/20 bottom-0`}></div>
           <div className="absolute w-1/15 h-1/8 border-b border-l left-5 bottom-5 border-cyan-500/30 pointer-events-none"></div>
           <div className="absolute w-1/15 h-1/8 border-t border-r right-5 top-20 border-rose-400/30 pointer-events-none"></div>
           <div className="flex lg:flex-row flex-col w-full justify-center items-center">
