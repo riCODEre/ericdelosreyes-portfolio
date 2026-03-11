@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote, Linkedin, Twitter, Mail, Facebook } from "lucide-react";
+import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote, Linkedin, Twitter, Mail, Facebook, Menu } from "lucide-react";
 import Image from 'next/image'
 import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
 import { Cert, Project, WorkExp } from './type'
@@ -22,7 +22,8 @@ export default function Home() {
   const [expSkill, setExpSkill ] = useState<string[]>([])
   const [greeting, setGreeting] = useState<string>('')
   const [curWork, setCurWork] = useState<WorkExp>(allWorkExp[1])
-
+  
+  const [menuState, setMenuState] = useState<boolean>(false)
   
   // all Toggles
   const toggleTheme = () => {
@@ -80,12 +81,12 @@ export default function Home() {
 
   return (
     <div className="text-gray-500 min-h-screen">
-      <header className={` border-b border-gray-500/30 ${navThemeBG} backdrop-blur-sm font-mono text-sm py-4 px-20 fixed top-0 right-0 left-0 z-50`}>
-        <nav className="flex justify-between items-center ">
+      <header className={` border-b border-gray-500/30 ${navThemeBG} backdrop-blur-sm min-w-screen font-mono text-sm py-4 px-5 lg:px-20 fixed top-0 right-0 left-0 z-50`}>
+        <nav className="flex justify-between items-center">
           <a type="" href="#" className={`uppercase ${themeFont} text-lg font-bold  [word-spacing:-0.4em]`} >
             Eric Delos Reyes
           </a>
-          <div className="flex justify-end items-center gap-10 ">
+          <div className="hidden lg:flex justify-end items-center gap-10 ">
             {allNav.map((nav, index) => (
               <a key={index} href={nav.link} className="space-x-2 hover:text-cyan-500">
                 {nav.name}
@@ -95,7 +96,24 @@ export default function Home() {
             <button className="cursor-pointer border hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)] border-cyan-500/40 p-2 transition-all duration-300" onClick={toggleTheme}>
               <ThemeButton/>
             </button>
-          </div> 
+          </div>
+          <div className="flex flex-col lg:hidden relative">
+            <button className="p-1 btn-primary-outline border-cyan-500/40! bg-glow-cyan ">
+              <Menu onClick={() => (setMenuState(prev => !prev))}/>
+            </button>
+            <div className="absolute top-12.5 -right-10" hidden={menuState}>
+              <ul className="menu bg-base-200 rounded-b-xl w-56 border-x border-b border-gray-500/30">
+                {allNav.map((nav, index) => (
+                  <li key={index}>
+                    <a href={nav.link} className="space-x-2 hover:text-cyan-500">
+                      {nav.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+          </div>
         </nav>
       </header>
       <main className="relative">
@@ -110,7 +128,7 @@ export default function Home() {
           <div className="absolute w-1/15 h-1/8 border-t border-r right-5 top-20 border-rose-400/30 pointer-events-none"></div>
           <div className="flex w-full justify-center items-center">
             {/* profile */}
-            <div className="">
+            <div className="hidden lg:block">
               <div className="rounded-2xl w-fit h-fit text-cyan-500  bg-linear-to-br from-cyan-500/50 via-transparent to-pink-500/50">
                 <div className="relative overflow-hidden">
                   <Image
@@ -131,10 +149,10 @@ export default function Home() {
               </div>
             </div>
             {/* Intro */}
-            <div className="w-1/2 flex flex-col justify-center items-start pl-20 space-y-4">
+            <div className="lg:w-1/2 flex flex-col justify-center pt-20 lg:pt-0 items-start px-5 lg:pl-20 space-y-2 lg:space-y-4">
                 <div className="flex items-center space-x-3">
-                  <div className="border-b border-cyan-500 w-15"></div>
-                  <h5 className=" text-sm text-cyan-500 flex justify-start items-center space-x-2">
+                  <div className="border-b border-cyan-500 w-3 lg:w-15"></div>
+                  <h5 className="text-[.6rem] lg:text-sm text-cyan-500 flex justify-start items-center space-x-2">
                     <span className="text-rose-400">npm</span> 
                     <span className={`${themeFont}`}>i</span> 
                     <span>software-engineer</span>
@@ -144,15 +162,15 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col space-x-0 leading-20">
                   
-                  <h1 className={`${themeFont} font-extrabold text-[5rem] transition-all duration-300 [word-spacing:-0.4em]`}>{greeting}
+                  <h1 className={`${themeFont} font-extrabold text-4xl lg:text-[5rem] transition-all duration-300 [word-spacing:-0.4em]`}>{greeting}
                     <span className="animate-ping duration-2000 text-cyan-500">|</span>
                   </h1>
                   
                 </div>
-                <p className="text-lg break-normal pr-30">
+                <p className="text-sm lg:text-lg break-normal lg:pr-30">
                   I'm a software engineer and gamer in Taguig City. I have the tendency to create extraordinary stuff (others call it overengineering)
                 </p>
-                <div className=" space-x-4">
+                <div className="flex flex-wrap gap-4">
                   <button className={`btn-primary px-9 py-2 uppercase ${themeFontRev} transition-all duration-300`}>
                     View_Projects
                   </button>
@@ -184,16 +202,16 @@ export default function Home() {
           </div>      
         </section>
         {/* For About Me */}
-        <section id="about" className={`relative min-h-screen flex justify-center items-center px-20 ${themeBG} `}>
-          <div className="w-1/2 space-y-6">
+        <section id="about" className={`relative min-h-screen flex flex-col lg:flex-row gap-5 justify-center items-center px-5 lg:pt-0 pt-10 lg:px-20 ${themeBG} `}>
+          <div className="lg:w-1/2 space-y-6">
             <div className="flex justify-start items-center space-x-3">
               <div className="border-b border-rose-400 w-8"></div>
-              <h2 className="text-4xl font-bold space-x-5 font-mono">
+              <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
                 <span className="text-rose-400 text-glow-rose ">01.</span>
                 <span className={`${themeFont}`}>About_Me</span>
               </h2>
             </div>
-            <p className={`text-xl ${themeFont} leading-loose pr-10`}>
+            <p className={`text-sm lg:text-xl ${themeFont} leading-loose pr-10`}>
                 I’m a systems-oriented software engineer who enjoys breaking problems 
                 down to their fundamentals and rebuilding them into better solutions. 
                 I tend to question why a system exists before building it, which leads 
@@ -205,33 +223,33 @@ export default function Home() {
                 the food I cook, and sometimes, just a normal person binging K-Drama and Anime.
               </p>
           </div>
-          <div className="px-10 w-3/5 space-y-4 h-full">
+          <div className="px-10 lg:w-1/2 space-y-4 h-full">
             <img src="/images/lucyhack.gif" alt="" className="rounded-2xl w-full h-1/2 object-cover" />
-            <div className="flex justify-between space-x-4 h-1/2 w-full">
-              <img src="/images/ryze.gif" alt="" className="rounded-2xl w-full object-cover" />
-              <img src="/images/soracooking.gif" alt="" className="rounded-2xl w-full object-cover" />
+            <div className="flex flex-wrap gap-4 h-full w-fit">
+              <img src="/images/ryze.gif" alt="" className="flex-1 rounded-2xl w-1/2 object-cover" />
+              <img src="/images/soracooking.gif" alt="" className="flex-1 rounded-2xl w-1/2 object-cover" />
             </div>
           </div>
         </section>
         {/* For experience */}
-        <section id="experience" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} space-y-5`}>
+        <section id="experience" className={`relative min-h-screen flex flex-col justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10 space-y-5`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-500 w-8"></div>
-            <h2 className="text-4xl font-bold space-x-5 font-mono">
+            <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
               <span className="text-cyan-500 text-glow-cyan ">02.</span>
               <span className={`${themeFont}`}>Experience</span>
             </h2>
           </div>
-          <div className="flex justify-between items-start w-full h-130 space-x-10">
-            <div className="flex justify-center items-center space-x-10 p-10 w-3/5 bg-linear-to-br h-full from-cyan-500/50 via-transparent to-pink-500/50 rounded-2xl">
+          <div className="flex lg:flex-row flex-col justify-between items-start w-full lg:h-130 gap-10">
+            <div className="flex lg:flex-row flex-col justify-center items-center p-10 gap-10 w-full lg:w-3/5 bg-linear-to-br h-fit lg:h-full from-cyan-500/50 via-transparent to-pink-500/50 rounded-2xl">
                 {allWorkExp.map((work, index) => (
                   <div key={index} className="">
-                    <img  src={`${work.link}`} alt="" onClick={() => (switchWork(work.tag))} className="hover:scale-105 active:scale-100 transition-all duration-100 ring-2 ring-cyan-500 rounded-full h-40 w-40 cursor-pointer shadow-2xl" />
+                    <img  src={`${work.link}`} alt="" onClick={() => (switchWork(work.tag))} className="hover:scale-105 active:scale-100 transition-all duration-100 ring-2 ring-cyan-500 rounded-full lg:h-40 lg:w-40 h-20 w-20 cursor-pointer shadow-2xl" />
                   </div>
                 ))}
             </div>
-            <div className={`relative flex items-start w-2/5 `}>
-              <div className="absolute ">
+            <div className={`relative flex items-start lg:w-2/5 `}>
+              <div className=" ">
                 <div className="space-y-3"> 
                   <div className="flex justify-between">
                     <h3 className={`${themeFont} font-semibold text-xl`}>{expPosition}</h3>
@@ -266,10 +284,10 @@ export default function Home() {
           </div>
         </section>
         {/* For skills */}
-        <section id="skills" className={`pb-20 relative min-h-screen flex flex-col justify-center space-y-7 items-start px-20 ${themeBG} `}>
+        <section id="skills" className={`pb-20 relative min-h-screen flex flex-col justify-center space-y-7 items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
-            <h2 className="text-4xl font-bold space-x-5 font-mono">
+            <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
               <span className="text-rose-400 text-glow-rose ">3.</span>
               <span className={`${themeFont}`}>Skills</span>
             </h2>
@@ -296,15 +314,15 @@ export default function Home() {
           </div>
         </section>
         {/* For projects */}
-        <section id="projects" className={`relative min-h-screen flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="projects" className={`relative min-h-screen flex flex-col justify-center items-start pb-5 px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
-            <h2 className="text-4xl font-bold space-x-5 font-mono">
+            <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
               <span className="text-cyan-400 text-glow-cyan ">04.</span>
               <span className={`${themeFont}`}>Projects</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 w-full mt-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2  w-full mt-4 gap-4">
             {allProjects.map((project, index) => (
               <div key={index} className="p-8 w-full space-y-4 border border-cyan-400/40 bg-glow-cyan bg-cyan-100/5">
                 <div className="flex justify-between">
@@ -333,15 +351,15 @@ export default function Home() {
           </div>
         </section>
         {/* For Certification */}
-        <section id="certifications" className={`relative pt-40 flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="certifications" className={`relative flex flex-col py-20 justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
-            <h2 className="text-4xl font-bold space-x-5 font-mono">
+            <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
               <span className="text-rose-400 text-glow-rose ">05.</span>
               <span className={`${themeFont}`}>Certifications</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 w-full mt-10 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 w-full mt-10 gap-4">
             {allCert.map((cert, index) => (
               <div key={index} className="p-5 w-full space-y-1 border bg-glow-cyan border-cyan-400/40 bg-cyan-100/5">
                 <Award size={30} className="text-rose-500"/>
@@ -361,15 +379,15 @@ export default function Home() {
           </div>
         </section>
         {/* For Recommendation */}
-        <section id="recommendations" className={`relative py-40 flex flex-col justify-center items-start px-20 ${themeBG} `}>
+        <section id="recommendations" className={`relative py-40 flex flex-col justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
-            <h2 className="text-4xl font-bold space-x-5 font-mono">
+            <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
               <span className="text-cyan-400 text-glow-cyan ">6.</span>
               <span className={`${themeFont}`}>Recommendations</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 w-full mt-10 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 w-full mt-10 gap-4">
             {allReco.map((recommendation, index) => (
               <div key={index} className="p-5 bg-glow-cyan w-full space-y-4 border border-cyan-400/40 bg-cyan-100/5">
                 <Quote size={25} className="text-cyan-500/40"/>
@@ -386,17 +404,17 @@ export default function Home() {
             
           </div>
         </section>
-        <section id="recommendations" className={`relative py-20  flex flex-col justify-center items-start px-20 bg-black/90 `}>
+        <section id="contacts" className={`relative lg:py-20  flex flex-col justify-center items-start px-5 lg:px-20 bg-black/90 py-10`}>
           <div className="flex flex-col w-full justify-center items-center space-y-10">
             <div className="flex justify-center items-center space-x-4">
               <div className="border-b border-cyan-400 w-8"></div>
-              <h2 className="text-4xl font-bold space-x-5 font-mono">
+              <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
                 <span className="text-cyan-400 text-glow-cyan ">7.</span>
                 <span className={`text-white`}>Contact</span>
               </h2>
               <div className="border-b border-cyan-400 w-8"></div>
             </div>
-            <p className="w-1/2 text-center">Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — my inbox is always open.</p>
+            <p className="lg:w-1/2 text-center">Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — my inbox is always open.</p>
             <button className={`uppercase btn-primary ${themeFontRev} font-mono text-lg px-10 py-4 flex bg-glow-cyan`}>
               Send_Message&#40;&#41;
             </button>
@@ -418,7 +436,7 @@ export default function Home() {
           
         </section>
       </main>
-      <footer className="bg-black/95 border-t border-gray-700/80 py-5 flex justify-center items-center">
+      <footer className="bg-black/95 border-t text-xs lg:text-base border-gray-700/80 py-5 w-full flex justify-center items-center">
         <p>© 2026 Eric Delos Reyes. All rights reserved.</p>
       </footer>
     </div>
