@@ -99,7 +99,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col lg:hidden relative">
             <button className="p-1 btn-primary-outline border-cyan-500/40! bg-glow-cyan ">
-              <Menu onClick={() => (setMenuState(prev => !prev))}/>
+              <Menu onClick={() => (() => (setMenuState(prev => !prev)))}/>
             </button>
             <div className="absolute top-12.5 -right-10" hidden={menuState}>
               <ul className="menu bg-base-200 rounded-b-xl w-56 border-x border-b border-gray-500/30">
