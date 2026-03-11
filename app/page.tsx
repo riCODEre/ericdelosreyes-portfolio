@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
 import { Cert, Project, WorkExp } from './type'
 
-
 export default function Home() {
   // all normal vars
   const greet:string = "hi, Eric here"
@@ -38,6 +37,9 @@ export default function Home() {
     }  
   }
 
+  const diffYears: string = formatExperience("2025-09-15")
+  const projectCount = allProjects.length
+
   // all use Effect
   useEffect(() => {
     for (let i = 0; i < greet.length; i++) {
@@ -45,6 +47,7 @@ export default function Home() {
         setGreeting(prev => prev + greet[i]);
       }, i * 110);
     }
+    
   }, []);
   useEffect(() => {
     setExpID(curWork.id)
@@ -183,7 +186,7 @@ export default function Home() {
                   
                 </div>
                 <p className="text-sm lg:text-lg break-normal lg:pr-30">
-                  I'm a software engineer and gamer in Taguig City. I have the tendency to create extraordinary stuff (others call it overengineering)
+                  I'm a software engineer and gamer based in Taguig City. I enjoy creating extraordinary things — sometimes a little overengineered.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a href="#projects">
@@ -200,11 +203,11 @@ export default function Home() {
                 </div>
                 <div className="flex justify-start items-end space-x-6 mt-4">
                   <div className="flex flex-col justify-center items-center space-y-1">
-                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">4+</h4>
+                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">{diffYears}</h4>
                     <p className="uppercase text-sm">Years exp</p>
                   </div>
                   <div className="flex flex-col justify-center items-center space-y-1">
-                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">4+</h4>
+                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">{projectCount-1}+</h4>
                     <p className="uppercase text-sm">Projects</p>
                   </div>
                   <div className="flex flex-col justify-center items-center space-y-1">
@@ -465,4 +468,18 @@ export default function Home() {
     </div>
     
   )
+}
+
+function formatExperience(startDate: string | Date): string {
+  const start = new Date(startDate);
+  const now = new Date();
+
+  const diffMs = now.getTime() - start.getTime();
+  const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+
+  if (diffYears < 1) {
+    return "<1";
+  } else {
+    return `${Math.floor(diffYears)}+`;
+  }
 }
