@@ -135,7 +135,6 @@ export default function Home() {
                 <div className="flex items-center space-x-3">
                   <div className="border-b border-cyan-500 w-15"></div>
                   <h5 className=" text-sm text-cyan-500 flex justify-start items-center space-x-2">
-                    
                     <span className="text-rose-400">npm</span> 
                     <span className={`${themeFont}`}>i</span> 
                     <span>software-engineer</span>
