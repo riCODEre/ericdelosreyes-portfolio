@@ -11,7 +11,7 @@ export default function Home() {
   const greet:string = "hi, Eric here"
   
   // all UseState
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light')
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark')
 
   const [expID, setExpID] = useState<number>()
 
@@ -62,17 +62,18 @@ export default function Home() {
   const heroThemeClasses:string = themeMode === 'light' ? 'bg-linear-to-r from-white via-white/95 to-white/80' : 'bg-linear-to-r from-black via-black/95 to-black/80'
   const themeBGColor:string = themeMode === 'light' ? 'white' : 'black'
   const navThemeBG:string = themeMode === 'light' ? 'bg-white/80' : 'bg-black/80'
+  const menuThemeBG:string = themeMode === 'light' ? 'bg-white/90!' : 'bg-black/90!'
 
   // functions
   function ThemeButton (){
     if (themeMode === 'light') {
       return (
-        <Sun size={18}></Sun>
+        <Sun size={15}></Sun>
       )
     }
     else{
       return (
-        <Moon size={18}></Moon>
+        <Moon size={15}></Moon>
       ) 
     }
   }
@@ -98,13 +99,20 @@ export default function Home() {
             </button>
           </div>
           <div className="flex flex-col lg:hidden relative">
-            <button className="p-1 btn-primary-outline border-cyan-500/40! bg-glow-cyan ">
-              <Menu onClick={() => (setMenuState(prev => !prev))}/>
-            </button>
-            <div className="absolute top-12.5 -right-10" hidden={menuState}>
-              <ul className="menu bg-base-200 rounded-b-xl w-56 border-x border-b border-gray-500/30">
+            <div className="flex items-center space-x-3">
+              <button className="cursor-pointer border hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)] border-cyan-500/40! p-2 transition-all duration-300" onClick={toggleTheme}>
+                <ThemeButton />
+              </button>
+              <button className="cursor-pointer border hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)] border-cyan-500/40! p-2 transition-all duration-300">
+                <Menu size={15} onClick={() => (setMenuState(prev => !prev))}/>
+              </button>
+              
+            </div>
+            
+            <div className="absolute top-12.5 -right-1" hidden={menuState}>
+              <ul className={`menu bg-base-200 rounded-b-xl w-fit ${menuThemeBG} border-x border-b border-gray-500/30`}>
                 {allNav.map((nav, index) => (
-                  <li key={index}>
+                  <li key={index} className="hover:bg-white/10">
                     <a href={nav.link} className="space-x-2 hover:text-cyan-500">
                       {nav.name}
                     </a>
@@ -126,17 +134,24 @@ export default function Home() {
           <div className={` absolute z-20 ${heroThemeClasses} w-full h-full flex justify-between`}>
           <div className="absolute w-1/15 h-1/8 border-b border-l left-5 bottom-5 border-cyan-500/30 pointer-events-none"></div>
           <div className="absolute w-1/15 h-1/8 border-t border-r right-5 top-20 border-rose-400/30 pointer-events-none"></div>
-          <div className="flex w-full justify-center items-center">
+          <div className="flex lg:flex-row flex-col w-full justify-center items-center">
             {/* profile */}
-            <div className="hidden lg:block">
+            <div className="">
               <div className="rounded-2xl w-fit h-fit text-cyan-500  bg-linear-to-br from-cyan-500/50 via-transparent to-pink-500/50">
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden lg:mt-0 mt-10">
                   <Image
                     src={'/images/profilepic.png'}
                     width={370}
                     height={370}
                     alt=""
-                    className="hover:scale-110 object-cover transition-all duration-550"
+                    className="hover:scale-110 object-cover transition-all duration-550 hidden lg:flex"
+                  />
+                  <Image
+                    src={'/images/profilepic.png'}
+                    width={100}
+                    height={100}
+                    alt=""
+                    className="hover:scale-110 object-cover transition-all duration-550 flex lg:hidden"
                   />
                   <div className={`absolute rounded-2xl inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-${themeBGColor} via-${themeBGColor}/60 to-transparent pointer-events-none`}></div>
                   <div className="absolute w-1/17 h-1/20 border-t border-l left-5 top-5 border-cyan-500/40 pointer-events-none"></div>
@@ -149,7 +164,7 @@ export default function Home() {
               </div>
             </div>
             {/* Intro */}
-            <div className="lg:w-1/2 flex flex-col justify-center pt-20 lg:pt-0 items-start px-5 lg:pl-20 space-y-2 lg:space-y-4">
+            <div className="lg:w-1/2 flex flex-col justify-center pt-5 lg:pt-0 items-start px-5 lg:pl-20 space-y-2 lg:space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="border-b border-cyan-500 w-3 lg:w-15"></div>
                   <h5 className="text-[.6rem] lg:text-sm text-cyan-500 flex justify-start items-center space-x-2">
@@ -171,12 +186,17 @@ export default function Home() {
                   I'm a software engineer and gamer in Taguig City. I have the tendency to create extraordinary stuff (others call it overengineering)
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button className={`btn-primary px-9 py-2 uppercase ${themeFontRev} transition-all duration-300`}>
-                    View_Projects
-                  </button>
-                  <button className="btn-secondary-outline px-9 py-2 uppercase text-rose-400">
-                    Contact_Me
-                  </button>
+                  <a href="#projects">
+                    <button className={`btn-primary px-9 py-2 uppercase ${themeFontRev} transition-all duration-300`}>
+                      View_Projects
+                    </button>
+                  </a>
+                  <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="">
+                    <button className="btn-secondary-outline px-9 py-2 uppercase text-rose-400">
+                      Contact_Me
+                    </button>
+                  </a>
+                  
                 </div>
                 <div className="flex justify-start items-end space-x-6 mt-4">
                   <div className="flex flex-col justify-center items-center space-y-1">
@@ -415,9 +435,12 @@ export default function Home() {
               <div className="border-b border-cyan-400 w-8"></div>
             </div>
             <p className="lg:w-1/2 text-center">Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — my inbox is always open.</p>
-            <button className={`uppercase btn-primary ${themeFontRev} font-mono text-lg px-10 py-4 flex bg-glow-cyan`}>
-              Send_Message&#40;&#41;
-            </button>
+            <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="">
+              <button className={`uppercase btn-primary ${themeFontRev} font-mono text-lg px-10 py-4 flex bg-glow-cyan`}>
+                Send_Message&#40;&#41;
+              </button>
+            </a>
+            
             <div className="flex justify-center items-center space-x-5 text-white/90">
               <a href="https://github.com/riCODEre" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
                 <Github />
