@@ -14,13 +14,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eric - Software Engineer",
+  title: "Eric Delos Reyes - Software Engineer",
   description: "This portfolio was created and used by Eric Delos Reyes for career purposes.",
   metadataBase: new URL("https://ericdelosreyes.com"),
   robots: { index: true, follow: true },
   openGraph: {
     title: "Eric - Software Engineer",
-    description: "Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — thericodere@gmail.com",
+    description: "I’m a systems-oriented software engineer who enjoys breaking problems down to their fundamentals and rebuilding them into better solutions. I tend to question why a system exists before building it, which leads me to design architectures focused on maintainability, performance, and long-term scalability. Recently, I’ve been exploring AI-driven applications and how intelligent systems can support better decision-making. Outside of coding, I enjoy bending the rules of the games I play, the food I cook, and sometimes, just a normal person binging K-Drama and Anime.",
     url: "https://ericdelosreyes.com/",
     type: "website",
     images: [
