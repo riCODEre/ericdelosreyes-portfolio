@@ -109,7 +109,7 @@ export const allWorkExp: WorkExp[] = [
         company: "Sociofact",
         desc: [
             "Reduced claim verification time to under 1 minute per item, automating a process that normally takes 30+ minutes manually.",
-            "Built a fully automated AI pipeline integrating Gemini for claim extraction and Perplexity for fact-checking, handling multi-modal content efficiently.",
+            "Built a fully automated AI pipeline integrating two AI models for claim extraction and fact-checking, handling multi-modal content efficiently.",
             "Scaled verification throughput, enabling batch processing of dozens of claims per run with high accuracy and minimal manual oversight."
         ],
         skill: ["Django", "Python", "Cloud Run", "Docker", "NeonDB", "Sentry", "AI Integration"]
