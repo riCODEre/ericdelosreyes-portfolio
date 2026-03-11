@@ -264,7 +264,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex lg:flex-row flex-col justify-between items-start w-full lg:h-130 gap-10">
-            <div className="flex lg:flex-row flex-col justify-center items-center p-10 gap-10 w-full lg:w-3/5 bg-linear-to-br h-fit lg:h-full from-cyan-500/50 via-transparent to-pink-500/50 rounded-2xl">
+            <div className="flex justify-center items-center p-10 gap-10 w-full lg:w-3/5 bg-linear-to-br h-fit lg:h-full from-cyan-500/50 via-transparent to-pink-500/50 rounded-2xl">
                 {allWorkExp.map((work, index) => (
                   <div key={index} className="">
                     <img  src={`${work.link}`} alt="" onClick={() => (switchWork(work.tag))} className="hover:scale-105 active:scale-100 transition-all duration-100 ring-2 ring-cyan-500 rounded-full lg:h-40 lg:w-40 h-20 w-20 cursor-pointer shadow-2xl" />
@@ -337,7 +337,7 @@ export default function Home() {
           </div>
         </section>
         {/* For projects */}
-        <section id="projects" className={`relative min-h-screen flex flex-col justify-center items-start pb-5 px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
+        <section id="projects" className={`relative min-h-screen flex flex-col justify-center items-start pb-5 px-5 lg:px-20 ${themeBG} lg:pt-0`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
             <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
@@ -374,7 +374,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Certification */}
-        <section id="certifications" className={`relative flex flex-col py-20 justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
+        <section id="certifications" className={`relative flex flex-col lg:py-40 justify-center items-start px-5 lg:px-20 ${themeBG} py-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-rose-400 w-8"></div>
             <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">
@@ -402,7 +402,7 @@ export default function Home() {
           </div>
         </section>
         {/* For Recommendation */}
-        <section id="recommendations" className={`relative py-40 flex flex-col justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 pt-10`}>
+        <section id="recommendations" className={`relative lg:py-40 flex flex-col justify-center items-start px-5 lg:px-20 ${themeBG} lg:pt-0 py-10`}>
           <div className="flex justify-start items-center space-x-3">
             <div className="border-b border-cyan-400 w-8"></div>
             <h2 className="text-xl lg:text-4xl font-bold space-x-5 font-mono">

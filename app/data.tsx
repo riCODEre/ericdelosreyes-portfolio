@@ -75,6 +75,15 @@ export const allSkill: Skill[] = [
         ]
     },
     {
+        title: "Design",
+        skillSet: [
+            "Canva",
+            "Figma",
+            "Archimate",
+            "Draw.io",
+        ]
+    },
+    {
         title: "Collab",
         skillSet: [
             "JIRA",
