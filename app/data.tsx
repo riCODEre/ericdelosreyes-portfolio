@@ -107,7 +107,7 @@ export const allWorkExp: WorkExp[] = [
             "Planned core application architecture, database workflows, and data processing pipelines while refining UI and optimizing performance.",
             "Collaborated with junior and senior developers and partner clients on system planning, database design, and backend-frontend integration."
         ],
-        skill: ["Apps Script", "React", "NestJS", "Vanilla JS", "Chakra UI", "Tailwind", "Github"]
+        skill: ["Apps Script", "React", "Vanilla JS", "Chakra UI", "Tailwind", "Github"]
     },
     {
         id: 2,
