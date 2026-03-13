@@ -133,7 +133,7 @@ export const allProjects: Project[] = [
         type: "Startup",
         desc: "Built an AI-powered SaaS content verification pipeline, reducing claim validation from 30+ minutes to under one minute while enabling high-throughput, accurate processing of multi-modal content.",
         link: "https://sociofact.com/",
-        skill: ["Django", "Gemini", "Perplexity", "Google Cloud Run", "NeonDB", "Docker"]
+        skill: ["Django", "AI Models", "Google Cloud Run", "NeonDB", "Docker"]
     },
     {
         id: 2,
