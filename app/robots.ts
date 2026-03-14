@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: "/terminal",
     },
     sitemap: "https://ericdelosreyes.com/sitemap.xml",
   };
