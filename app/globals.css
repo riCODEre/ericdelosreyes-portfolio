@@ -69,6 +69,22 @@ h1 span, h2 span, h3 span, h4 span, h5 span {
   }
 }
 
+/* Warning Full */
+.btn-warning {
+  @apply bg-red-500 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply bg-red-600;
+  }
+
+  &:active {
+    @apply bg-red-700 shadow-inner scale-95; /* scale down 95% */
+  }
+
+  &:disabled {
+    @apply bg-red-300 cursor-not-allowed shadow-none;
+  }
+}
 
 /* ---------- OUTLINE/BORDER BUTTONS ---------- */
 
@@ -103,6 +119,23 @@ h1 span, h2 span, h3 span, h4 span, h5 span {
 
   &:disabled {
     @apply border-rose-300 cursor-not-allowed shadow-none;
+  }
+}
+
+/* Warning Outline */
+.btn-warning-outline {
+  @apply bg-transparent border border-red-500 shadow transition-all duration-150 cursor-pointer;
+
+  &:hover {
+    @apply border-red-600;
+  }
+
+  &:active {
+    @apply border-red-700 shadow-inner scale-95;
+  }
+
+  &:disabled {
+    @apply border-red-300 cursor-not-allowed shadow-none;
   }
 }
 

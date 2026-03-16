@@ -1,17 +1,19 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote, Linkedin, Twitter, Mail, Facebook, Menu } from "lucide-react";
 import Image from 'next/image'
+import Link from "next/link"
 import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
 import { Cert, Project, WorkExp } from './type'
+import { useTheme } from "./context"
 
 export default function Home() {
   // all normal vars
   const greet:string = "hi, Eric here"
   
   // all UseState
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark')
-
+  const {themeMode, toggleTheme} = useTheme()
+   
   const [expID, setExpID] = useState<number>()
 
   const [expPosition, setExpPosition] = useState<string>('')
@@ -24,10 +26,8 @@ export default function Home() {
   
   const [menuState, setMenuState] = useState<boolean>(true)
   
-  // all Toggles
-  const toggleTheme = () => {
-    setThemeMode(prev => (prev == 'light' ? 'dark' : 'light'))
-  }
+
+  
   const switchWork = (work:string) => {
     for (let workExp of allWorkExp){
       if (work === workExp.tag){
@@ -39,9 +39,11 @@ export default function Home() {
 
   const diffYears: string = formatExperience("2025-09-15")
   const projectCount = allProjects.length
-
+  const greetRan = useRef<boolean>(false)
   // all use Effect
   useEffect(() => {
+    if (greetRan.current) return
+    greetRan.current = true
     for (let i = 0; i < greet.length; i++) {
       setTimeout(() => {
         setGreeting(prev => prev + greet[i]);
@@ -177,15 +179,12 @@ export default function Home() {
                     <span className={`${themeFont}`}>i</span> 
                     <span>software-engineer</span>
                     <span className="text-gray-500">--full-stack</span>
-                    
                     </h5>
                 </div>
                 <div className="flex flex-col space-x-0 leading-20">
-                  
                   <h1 className={`${themeFont} font-extrabold text-4xl lg:text-[5rem] transition-all duration-300 [word-spacing:-0.4em]`}>{greeting}
                     <span className="animate-ping duration-2000 text-cyan-500">|</span>
                   </h1>
-                  
                 </div>
                 <p className="text-sm lg:text-lg break-normal lg:pr-30">
                   I'm a software engineer and gamer based in Taguig City. I enjoy creating extraordinary things — sometimes a little overengineered.
