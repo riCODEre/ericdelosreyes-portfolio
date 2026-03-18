@@ -7,22 +7,42 @@ import Nav from "./nav"
 import type { Hero } from "@/app/type"
 import { apiClient } from "@/app/services"
 
+type HeroPayload = {
+    greeting: string
+    subtitle: string
+    description: string
+    expStart: string
+    email: string
+    profile: string
+    imageBG: string
+    about: string
+}
+
+const defaultHeroPayload: HeroPayload = {
+    greeting: "",
+    subtitle: "",
+    description: "",
+    expStart: "",
+    email: "placeholder@example.com",
+    profile: "",
+    imageBG: "",
+    about: "",
+}
+
 export default function Hero(){
     const [heroData, setHeroData] = useState<Hero>()
+    const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
-        const fallbackHeroData = {
-            id: 0, greeting: "", subtitle: "", description: "",
-            expStart: "", email: "", profile: "", imageBG: "", about: ""
-        };
-
         (async () => {
             try {
                 const response = await apiClient.get("/hero/");
                 setHeroData(response.data);
             } catch (error) {
-                setHeroData(fallbackHeroData);
                 console.error("Error fetching hero data:", error);
+            }
+            finally {
+                setLoading(false)
             }
         })();
     }, []);
@@ -60,7 +80,7 @@ export default function Hero(){
     
     const handleSave = async () => {
         try {
-            const updatedHeroData = {
+            const updatedHeroData: HeroPayload = {
                 greeting,
                 subtitle,
                 description,
@@ -70,11 +90,25 @@ export default function Hero(){
                 imageBG: imageBg,
                 about: heroData?.about ?? "",
             }
-            await apiClient.put("/hero/", updatedHeroData)
+
+            let savedHero: Hero
+            if (heroData?.id && heroData.id > 0) {
+                const response = await apiClient.put(`/hero/${heroData.id}`, updatedHeroData)
+                savedHero = response.data
+            } else {
+                const response = await apiClient.post("/hero/", updatedHeroData)
+                savedHero = response.data
+            }
+
+            setHeroData(savedHero)
             setIsDirty(false)
         } catch (error) {
             console.error("Error saving hero data:", error)
         }
+    }
+
+    if (loading) {
+        return <main className="p-6 text-gray-500">Loading hero data...</main>
     }
 
 
@@ -83,6 +117,11 @@ export default function Hero(){
             <Nav onClickSave={handleSave}/>
             <main className="p-6 text-gray-500 space-y-4">
                 <h2 className={`ml-2 ${themeFont}`}>Hero Section</h2>
+                {!heroData && (
+                    <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl text-sm text-gray-400">
+                        Hero record not found yet. Fill fields and click Save to create it.
+                    </div>
+                )}
                 <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
                     <TextInput inputFor="hero-greeting" text="Greeting Text" placeholder="..." value={greeting} onChange={(e) => setGreeting(e.target.value)} />
                     <TextInput inputFor="hero-subtitle" text="Subtitle" placeholder="..." value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />

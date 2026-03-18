@@ -1,35 +1,54 @@
 "use client"
 
-import { TextInput, TextAreaInput } from "./components"
+import { TextAreaInput } from "./components"
 import { useTheme } from "@/app/context"
-import { aboutData } from "@/app/data"
 import { useEffect, useState } from "react"
 import type { Hero } from "@/app/type"
 import { apiClient } from "@/app/services"
 import Nav from "./nav"
 
+type HeroPayload = {
+    greeting: string
+    subtitle: string
+    description: string
+    expStart: string
+    email: string
+    profile: string
+    imageBG: string
+    about: string
+}
+
+const defaultHeroPayload: HeroPayload = {
+    greeting: "",
+    subtitle: "",
+    description: "",
+    expStart: "",
+    email: "placeholder@example.com",
+    profile: "",
+    imageBG: "",
+    about: "",
+}
+
 export default function About(){
 
-    const { themeMode, toggleTheme } = useTheme()
+    const { themeMode } = useTheme()
     const themeFont = themeMode === 'light' ? 'text-black' : 'text-white'
 
     const [heroData, setHeroData] = useState<Hero>()
+    const [loading, setLoading] = useState<boolean>(true)
     const [isDirty, setIsDirty] = useState<boolean>(false)
     
     useEffect(() => {
-        const fallbackHeroData = {
-            id: 0, greeting: "", subtitle: "", description: "",
-            expStart: "", email: "", profile: "", imageBG: "", about: ""
-        };
-
         (async () => {
             try {
                 const response = await apiClient.get("/hero/");
                 setHeroData(response.data);
                 setAbout(response.data.about);
             } catch (error) {
-                setHeroData(fallbackHeroData);
                 console.error("Error fetching hero data:", error);
+            }
+            finally {
+                setLoading(false)
             }
         })();
     }, []);
@@ -42,21 +61,31 @@ export default function About(){
     
     const handleSave = async () => {
         try {
-            const updatedHeroData = {
-                greeting: heroData?.greeting || "",
-                subtitle: heroData?.subtitle || "",
-                description: heroData?.description || "",
-                expStart: heroData?.expStart || "",
-                email: heroData?.email || "",
-                profile: heroData?.profile || "",
-                imageBG: heroData?.imageBG || "",
-                about: about ?? "",
+            let savedHero: Hero
+
+            if (heroData?.id && heroData.id > 0) {
+                const response = await apiClient.patch(`/hero/${heroData.id}/about`, {
+                    about: about ?? "",
+                })
+                savedHero = response.data
+            } else {
+                const response = await apiClient.post("/hero/", {
+                    ...defaultHeroPayload,
+                    about: about ?? "",
+                })
+                savedHero = response.data
             }
-            await apiClient.put("/hero/", updatedHeroData)
+
+            setHeroData(savedHero)
+            setAbout(savedHero.about)
             setIsDirty(false)
         } catch (error) {
             console.error("Error saving hero data:", error)
         }
+    }
+
+    if (loading) {
+        return <main className="p-6 text-gray-500">Loading about data...</main>
     }
 
     return (
@@ -64,6 +93,11 @@ export default function About(){
             <Nav onClickSave={handleSave}/>
             <main className=" p-6 text-gray-500 space-y-4">
                 <h2 className={` ${themeFont} ml-2`}>About Section</h2>
+                {!heroData && (
+                    <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl text-sm text-gray-400">
+                        Hero record not found yet. Enter about text and click Save to create it.
+                    </div>
+                )}
                 <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
                     <TextAreaInput inputFor="about-description" text="Description" className="whitespace-pre-line" placeholder="..." value={about} onChange={(e) => setAbout(e.target.value)}/>
                 </div>
