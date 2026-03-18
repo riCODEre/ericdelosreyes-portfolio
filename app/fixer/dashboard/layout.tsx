@@ -6,23 +6,37 @@ type Props = {
   children: ReactNode;
 };
 
+function getBackendBaseUrl(): string {
+  const raw = process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+  return raw.replace(/\/+$/, "");
+}
+
 async function checkAuth() {
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
+  try {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+    const backendBaseUrl = getBackendBaseUrl();
 
-  const res = await fetch("http://localhost:8000/api/v1/auth/me", {
-    headers: {
-      cookie: cookieHeader,
-    },
-    cache: "no-store", // IMPORTANT: don't cache auth
-  });
+    if (!backendBaseUrl) {
+      console.error("Missing BACKEND_URL or NEXT_PUBLIC_BACKEND_URL")
+      redirect("/fixer")
+    }
 
-  if (!res.ok) {
-    console.log("User not authenticated, redirecting to login")
-    redirect("/fixer");
+    const res = await fetch(`${backendBaseUrl}/auth/me`, {
+      headers: {
+        cookie: cookieHeader,
+      },
+      cache: "no-store", // IMPORTANT: don't cache auth
+    });
+
+    if (!res.ok) {
+      console.log("User not authenticated, redirecting to login")
+      redirect("/fixer");
+    }
+  } catch (error) {
+    console.error("Auth check failed:", error)
+    redirect("/fixer")
   }
-
-  return res.json(); // optional (if you want user data)
 }
 
 export default async function AdminLayout({ children }: Props) {
