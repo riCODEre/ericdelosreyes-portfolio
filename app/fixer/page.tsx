@@ -1,13 +1,14 @@
 "use client"
 
-import { log } from "console"
 import { useTheme } from "../context"
-import { ArrowBigLeft, ArrowLeft, Lock, Mail } from "lucide-react"
+import { ArrowLeft, Lock, Mail } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { loginUser } from "./services"
+import { useRouter } from "next/navigation"
 
 export default function Fixer(){
-
+    const router = useRouter()
     const { themeMode, toggleTheme } = useTheme()
 
     const [loginEmail, setLoginEmail] = useState<string>("")
@@ -15,6 +16,16 @@ export default function Fixer(){
 
     const bgTheme = themeMode === 'light' ? 'bg-white' : 'bg-[#080A0C]'
     const bgFont = themeMode === 'light' ? 'text-black' : 'text-white'
+
+    async function handleLogin(){
+        try {
+            const response = await loginUser(loginEmail, loginPass)
+            console.log(response)
+            router.push("/fixer/dashboard")
+        } catch (error) {
+            console.error("Login error:", error)
+        }
+    }
 
     return (
         <main className={`w-full h-screen flex flex-col justify-center items-center ${bgTheme} ${bgFont} space-y-8`}>
@@ -47,9 +58,8 @@ export default function Fixer(){
                         <input id="loginPass" type="password" placeholder="••••••••" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} className="py-10!"/>
                     </label>
                 </div>
-                <Link href="/fixer/dashboard">
-                    <button className="btn-primary py-3 rounded-xl w-full text-black/70 uppercase font-mono font-bold">authenticate()</button>
-                </Link>
+                <button className="btn-primary py-3 rounded-xl w-full text-black/70 uppercase font-mono font-bold" onClick={() => (handleLogin())}>authenticate()</button>
+ 
                 
             </div>
             

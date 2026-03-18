@@ -1,6 +1,7 @@
 import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
 import { Plus, Trash } from "lucide-react"
+import { allCert } from "@/app/data"
 
 export default function Certifications(){
     const { themeMode, toggleTheme } = useTheme()
@@ -14,20 +15,20 @@ export default function Certifications(){
                     <span>Add</span>
                 </button>
             </div>
-            <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
-                <div className="flex justify-between space-x-2 items-center">
-                    <h3 className="text-sm text-cyan-500">#1</h3>
-                    <Trash size={18} className="text-red-500 hover:text-red-700" />
+            {allCert.map((cert, index) => (
+                <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
+                    <div className="flex justify-between space-x-2 items-center">
+                        <h3 className="text-sm text-cyan-500">#{index + 1}</h3>
+                        <Trash size={18} className="text-red-500 hover:text-red-700" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <TextInput inputFor="proj-title" text="Title" placeholder="..." value={cert.title}/>
+                        <TextInput inputFor="proj-issuer" text="Issuer" placeholder="..." value={cert.issuer}/>
+                        <TextInput inputFor="proj-year" text="Year" placeholder="..." value={cert.year}/>
+                        <TextInput inputFor="proj-link" text="Link" placeholder="..." value={cert.link}/>
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <TextInput inputFor="proj-title" text="Title" placeholder="..."/>
-                    <TextInput inputFor="proj-issuer" text="Issuer" placeholder="..."/>
-                    <TextInput inputFor="proj-year" text="Year" placeholder="..."/>
-                    <TextInput inputFor="proj-link" text="Link" placeholder="..."/>
-                </div>
-                
-
-            </div>
+            ))}
         </main>
     )
 }

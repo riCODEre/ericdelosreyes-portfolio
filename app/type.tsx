@@ -1,4 +1,17 @@
 
+
+export type Hero = {
+    id: number
+    greeting: string
+    subtitle: string
+    description: string
+    expStart: string
+    email: string
+    profile: string
+    imageBG: string
+    about: string
+}
+
 export type Cert = {
     title: string
     issuer: string

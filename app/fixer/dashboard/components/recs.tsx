@@ -1,6 +1,7 @@
 import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
 import { Plus, Trash } from "lucide-react"
+import { allReco } from "@/app/data"
 
 export default function Recommendations(){
     const { themeMode, toggleTheme } = useTheme()
@@ -14,19 +15,20 @@ export default function Recommendations(){
                     <span>Add</span>
                 </button>
             </div>
-            <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
-                <div className="flex justify-between space-x-2 items-center">
-                    <h3 className="text-sm text-cyan-500">#1</h3>
-                    <Trash size={18} className="text-red-500 hover:text-red-700" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <TextInput inputFor="recs-name" text="Name" placeholder="..."/>
-                    <TextInput inputFor="recs-post-company" text="Position & Company" placeholder="..."/>
-                </div>
-                <TextAreaInput inputFor="recs-remark" text="Remark" placeholder="..."/>
-                
+            {allReco.map((reco, index) => (
+                <div className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
+                    <div className="flex justify-between space-x-2 items-center">
+                        <h3 className="text-sm text-cyan-500">#{index + 1}</h3>
+                        <Trash size={18} className="text-red-500 hover:text-red-700" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <TextInput inputFor="recs-name" text="Name" placeholder="..." value={reco.name}/>
+                        <TextInput inputFor="recs-post-company" text="Position & Company" placeholder="..." value={reco.positionCompany}/>
+                    </div>
+                    <TextAreaInput inputFor="recs-remark" text="Remark" placeholder="..." value={reco.remark}/>
 
-            </div>
+                </div>
+            ))}
         </main>
     )
 }

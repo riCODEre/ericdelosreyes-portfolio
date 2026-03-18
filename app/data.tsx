@@ -1,7 +1,21 @@
 
-import { Cert, Project, Skill, WorkExp, Recommendation, Nav } from './type'
+import { Cert, Project, Skill, WorkExp, Recommendation, Nav, Hero } from './type'
 
+export const heroData: Hero = {
+    id: 1,
+    greeting: "Hi, I'm Eric",
+    subtitle: "software-engineer",
+    description: "Passionate about crafting efficient and innovative software solutions. With a strong foundation in programming and a drive for continuous learning, I am eager to contribute to impactful projects and grow as a developer.",
+    expStart: "2025-09-01",
+    email: "eric@example.com",
+    profile: "/images/DelosReyes.jpg",
+    imageBG: "/images/heroimage.jpg",
+    about: "dd"
+}
 
+export const aboutData = `I’m a systems-oriented software engineer who enjoys breaking problems down to their fundamentals and rebuilding them into better solutions. I tend to question why a system exists before building it, which leads me to design architectures focused on maintainability, performance, and long-term scalability. Recently, I’ve been exploring AI-driven applications and how intelligent systems can support better decision-making. 
+
+Outside of coding, I enjoy bending the rules of the games I play, the food I cook, and sometimes, just a normal person binging K-Drama and Anime.`
 
 export const allSkill: Skill[] = [
     {

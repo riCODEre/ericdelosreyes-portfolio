@@ -6,7 +6,6 @@ import { Menu } from "./type"
 import Link from "next/link"
 import About from "./components/about"
 import Certifications from "./components/certs"
-import Contacts from "./components/contacts"
 import Experience from "./components/exp"
 import Hero from "./components/hero"
 import Projects from "./components/projects"
@@ -25,12 +24,11 @@ export default function Dashboard(){
         { name: "Projects", Icon: FolderOpen, Comp: Projects },
         { name: "Certifications", Icon: Award, Comp: Certifications },
         { name: "Recommendations", Icon: Quote, Comp: Recommendations },
-        { name: "Contact", Icon: Phone, Comp: Contacts },
     ]
 
     const { themeMode, toggleTheme } = useTheme()
     const [ curMenu, setCurMenu] = useState<string>(menu[0].name)
-    const [curComp, setCurComp] = useState<Menu>(menu[0])
+    const [ curComp, setCurComp] = useState<Menu>(menu[0])
 
     const bgTheme = themeMode === 'light' ? 'bg-white' : 'bg-[#080A0C]'
     const bgFont = themeMode === 'light' ? 'text-black' : 'text-white'
@@ -84,24 +82,7 @@ export default function Dashboard(){
             </aside>
             {/* Will contain dashboard content */}
             <div className="w-4/5 h-full">
-                <nav className="text-sm text-bold h-1/9 w-full border-b border-cyan-500/20 p-5 flex items-center justify-between">
-                    <button className="cursor-pointer border hover:shadow-[0_0_20px_5px_rgba(0,184,219,0.5)] border-cyan-500/40 p-2 transition-all duration-300" onClick={toggleTheme}>
-                        <ThemeButton/>
-                    </button>
-                    <div className="flex items-center justify-end  space-x-4">
-                        <button className="btn-primary px-5 py-2 rounded-lg text-black space-x-1 flex items-center justify-center">
-                            <Save className="w-4 h-4"/>
-                            <span className="">Save</span>
-                            
-                        </button>
-                        <button className="btn-warning-outline px-5 py-2 rounded-lg text-red-500 space-x-1 flex items-center justify-center">
-                            <RotateCcw className="w-4 h-4"/>
-                            <span className="">Reset</span>
-                            
-                        </button>
-                    </div>
-                    
-                </nav>
+                
                 <curComp.Comp/>
 
             </div>
