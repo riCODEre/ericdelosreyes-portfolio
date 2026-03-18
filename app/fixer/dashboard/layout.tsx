@@ -1,46 +1,42 @@
-import { ReactNode } from "react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+
+import { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiClient } from "@/app/services";
 
 type Props = {
   children: ReactNode;
 };
 
-function getBackendBaseUrl(): string {
-  const raw = process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
-  return raw.replace(/\/+$/, "");
-}
+export default function AdminLayout({ children }: Props) {
+  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
-async function checkAuth() {
-  try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
-    const backendBaseUrl = getBackendBaseUrl();
+  useEffect(() => {
+    let mounted = true;
 
-    if (!backendBaseUrl) {
-      console.error("Missing BACKEND_URL or NEXT_PUBLIC_BACKEND_URL")
-      redirect("/fixer")
-    }
+    (async () => {
+      try {
+        await apiClient.get("/auth/me");
+        if (mounted) {
+          setIsChecking(false);
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        if (mounted) {
+          router.replace("/fixer");
+        }
+      }
+    })();
 
-    const res = await fetch(`${backendBaseUrl}/auth/me`, {
-      headers: {
-        cookie: cookieHeader,
-      },
-      cache: "no-store", // IMPORTANT: don't cache auth
-    });
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
-    if (!res.ok) {
-      console.log("User not authenticated, redirecting to login")
-      redirect("/fixer");
-    }
-  } catch (error) {
-    console.error("Auth check failed:", error)
-    redirect("/fixer")
+  if (isChecking) {
+    return <main className="p-6 text-gray-500">Checking authentication...</main>;
   }
-}
-
-export default async function AdminLayout({ children }: Props) {
-  await checkAuth();
 
   return <>{children}</>;
 }
