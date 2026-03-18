@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import Nav from "./nav"
 import type { Hero } from "@/app/type"
 import { apiClient } from "@/app/services"
+import axios from "axios"
 
 type HeroPayload = {
     greeting: string
@@ -29,6 +30,8 @@ const defaultHeroPayload: HeroPayload = {
     about: "",
 }
 
+const DEFAULT_HERO_EMAIL = "placeholder@example.com"
+
 export default function Hero(){
     const [heroData, setHeroData] = useState<Hero>()
     const [loading, setLoading] = useState<boolean>(true)
@@ -39,7 +42,11 @@ export default function Hero(){
                 const response = await apiClient.get("/hero/");
                 setHeroData(response.data);
             } catch (error) {
-                console.error("Error fetching hero data:", error);
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    setHeroData(undefined)
+                } else {
+                    console.error("Error fetching hero data:", error);
+                }
             }
             finally {
                 setLoading(false)
@@ -80,12 +87,14 @@ export default function Hero(){
     
     const handleSave = async () => {
         try {
+            const normalizedEmail = email.trim() || DEFAULT_HERO_EMAIL
+
             const updatedHeroData: HeroPayload = {
                 greeting,
                 subtitle,
                 description,
                 expStart: expStartDate,
-                email,
+                email: normalizedEmail,
                 profile,
                 imageBG: imageBg,
                 about: heroData?.about ?? "",
@@ -101,9 +110,14 @@ export default function Hero(){
             }
 
             setHeroData(savedHero)
+            setEmail(savedHero.email)
             setIsDirty(false)
         } catch (error) {
-            console.error("Error saving hero data:", error)
+            if (axios.isAxiosError(error) && error.response?.status === 422) {
+                console.error("Hero save validation failed:", error.response.data)
+            } else {
+                console.error("Error saving hero data:", error)
+            }
         }
     }
 

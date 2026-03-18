@@ -1,18 +1,56 @@
 'use client';
 import { useState, useEffect, useRef } from "react";
-import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Medal, Badge, FileCheck, Award, Quote, Linkedin, Twitter, Mail, Facebook, Menu } from "lucide-react";
+import { Sun, Moon, Gpu, Cpu, Github, ExternalLink, Award, Quote, Linkedin, Mail, Facebook, Menu } from "lucide-react";
 import Image from 'next/image'
-import Link from "next/link"
-import { allWorkExp, allSkill, allProjects, allCert, allReco, allNav } from "./data"
-import { Cert, Project, WorkExp } from './type'
+import { Cert, Hero, Nav, Project, Recommendation, Skill, WorkExp } from './type'
 import { useTheme } from "./context"
+import { apiClient } from "./services"
+
+const DEFAULT_HERO: Hero = {
+  id: 0,
+  greeting: "",
+  subtitle: "",
+  description: "",
+  expStart: "",
+  email: "",
+  profile: "",
+  imageBG: "",
+  about: "",
+}
+
+const DEFAULT_ABOUT = ""
+
+const DEFAULT_NAV: Nav[] = [
+  { name: "About", link: "#about" },
+  { name: "Experience", link: "#experience" },
+  { name: "Skills", link: "#skills" },
+  { name: "Projects", link: "#projects" },
+  { name: "Certification", link: "#certifications" },
+  { name: "Recommendation", link: "#recommendations" },
+]
+
+const EMPTY_WORK: WorkExp = {
+  id: 0,
+  tag: "",
+  link: "",
+  position: "",
+  date: "",
+  company: "",
+  desc: [],
+  skill: [],
+}
 
 export default function Home() {
-  // all normal vars
-  const greet:string = "hi, Eric here"
-  
   // all UseState
   const {themeMode, toggleTheme} = useTheme()
+
+  const [hero, setHero] = useState<Hero>(DEFAULT_HERO)
+  const [aboutText, setAboutText] = useState<string>(DEFAULT_ABOUT)
+  const [workExperiences, setWorkExperiences] = useState<WorkExp[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [certifications, setCertifications] = useState<(Cert & { id?: number })[]>([])
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
    
   const [expID, setExpID] = useState<number>()
 
@@ -22,35 +60,130 @@ export default function Home() {
   const [expDesc,setExpDesc ] = useState<string[]>([])
   const [expSkill, setExpSkill ] = useState<string[]>([])
   const [greeting, setGreeting] = useState<string>('')
-  const [curWork, setCurWork] = useState<WorkExp>(allWorkExp[1])
+  const [curWork, setCurWork] = useState<WorkExp>(EMPTY_WORK)
   
   const [menuState, setMenuState] = useState<boolean>(true)
+
+  const greetingTimers = useRef<number[]>([])
   
 
   
   const switchWork = (work:string) => {
-    for (let workExp of allWorkExp){
+    for (const workExp of workExperiences){
       if (work === workExp.tag){
         setCurWork(workExp)
+        break
       }
-      
     }  
   }
 
-  const diffYears: string = formatExperience("2025-09-15")
-  const projectCount = allProjects.length
-  const greetRan = useRef<boolean>(false)
+  const diffYears: string = formatExperience(hero.expStart)
+  const projectCount = projects.length
+  const contactHref = hero.email
+    ? `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(hero.email)}`
+    : ""
+
   // all use Effect
   useEffect(() => {
-    if (greetRan.current) return
-    greetRan.current = true
-    for (let i = 0; i < greet.length; i++) {
-      setTimeout(() => {
-        setGreeting(prev => prev + greet[i]);
-      }, i * 110);
+    let isMounted = true
+
+    ;(async () => {
+      try {
+        const response = await apiClient.get("/hero/")
+        if (!isMounted) return
+        setHero(response.data)
+        setAboutText(response.data.about || DEFAULT_ABOUT)
+      } catch (error) {
+        console.error("Error fetching hero:", error)
+      }
+
+      try {
+        const response = await apiClient.get("/exp/")
+        if (!isMounted) return
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setWorkExperiences(response.data)
+        }
+      } catch (error) {
+        console.error("Error fetching experiences:", error)
+      }
+
+      try {
+        const response = await apiClient.get("/skills/")
+        if (!isMounted) return
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setSkills(response.data)
+        }
+      } catch (error) {
+        console.error("Error fetching skills:", error)
+      }
+
+      try {
+        const response = await apiClient.get("/projects/")
+        if (!isMounted) return
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setProjects(response.data)
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error)
+      }
+
+      try {
+        const response = await apiClient.get("/certifications/")
+        if (!isMounted) return
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setCertifications(response.data)
+        }
+      } catch (error) {
+        console.error("Error fetching certifications:", error)
+      }
+
+      try {
+        const response = await apiClient.get("/recommendations/")
+        if (!isMounted) return
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setRecommendations(response.data)
+        }
+      } catch (error) {
+        console.error("Error fetching recommendations:", error)
+      }
+    })()
+
+    return () => {
+      isMounted = false
     }
-    
-  }, []);
+  }, [])
+
+  useEffect(() => {
+    if (!workExperiences.length) return
+
+    setCurWork((prev) => {
+      const exists = workExperiences.some((work) => work.id === prev.id)
+      return exists ? prev : workExperiences[0]
+    })
+  }, [workExperiences])
+
+  useEffect(() => {
+    greetingTimers.current.forEach((timer) => window.clearTimeout(timer))
+    greetingTimers.current = []
+    setGreeting("")
+
+    const greetText = hero.greeting || "hi, Eric here"
+
+    if (!greetText) return
+
+    for (let i = 0; i < greetText.length; i++) {
+      const timer = window.setTimeout(() => {
+        setGreeting(prev => prev + greetText[i]);
+      }, i * 110)
+      greetingTimers.current.push(timer)
+    }
+
+    return () => {
+      greetingTimers.current.forEach((timer) => window.clearTimeout(timer))
+      greetingTimers.current = []
+    }
+  }, [hero.greeting]);
+
   useEffect(() => {
     setExpID(curWork.id)
     setExpPosition(curWork.position)
@@ -58,7 +191,7 @@ export default function Home() {
     setExpCompany(curWork.company)
     setExpDesc(curWork.desc)
     setExpSkill(curWork.skill)
-  }, [switchWork])
+  }, [curWork])
 
   // others
   const themeFont:string = themeMode === 'light' ? 'text-black' : 'text-white/80'
@@ -94,7 +227,7 @@ export default function Home() {
             Eric Delos Reyes
           </a>
           <div className="hidden lg:flex justify-end items-center gap-10 ">
-            {allNav.map((nav, index) => (
+            {DEFAULT_NAV.map((nav, index) => (
               <a key={index} href={nav.link} className="space-x-2 hover:text-cyan-500">
                 {nav.name}
               </a>
@@ -117,7 +250,7 @@ export default function Home() {
             
             <div className="absolute top-12.5 -right-1" hidden={menuState}>
               <ul className={`menu bg-base-200 rounded-b-xl w-fit ${menuThemeBG} border-x border-b border-gray-500/30`}>
-                {allNav.map((nav, index) => (
+                {DEFAULT_NAV.map((nav, index) => (
                   <li key={index} className="hover:bg-white/10">
                     <a href={nav.link} className="space-x-2 hover:text-cyan-500">
                       {nav.name}
@@ -135,7 +268,11 @@ export default function Home() {
         {/* For hero section */}
         <section id="hero" className="relative min-h-screen">
           <div className="absolute inset-0">
-            <img src="/images/heroimage.jpg" alt="" className="z-10 w-full h-full object-cover" />
+            {hero.imageBG ? (
+              <img src={hero.imageBG} alt="" className="z-10 w-full h-full object-cover" />
+            ) : (
+              <div className={`w-full h-full ${themeBG}`}></div>
+            )}
           </div>
           <div className={` absolute z-20 ${heroThemeClasses} w-full h-full flex justify-between`}>
           <div className={`absolute w-full bg-linear-to-t ${themeBGHeroAbout} h-1/20 bottom-0`}></div>
@@ -146,20 +283,20 @@ export default function Home() {
             <div className="">
               <div className="rounded-2xl w-fit h-fit text-cyan-500  bg-linear-to-br from-cyan-500/50 via-transparent to-pink-500/50">
                 <div className="relative overflow-hidden lg:mt-0 mt-10">
-                  <Image
-                    src={'/images/profilepic.png'}
-                    width={370}
-                    height={370}
-                    alt=""
-                    className="hover:scale-110 object-cover transition-all duration-550 hidden lg:flex"
-                  />
-                  <Image
-                    src={'/images/profilepic.png'}
-                    width={100}
-                    height={100}
-                    alt=""
-                    className="hover:scale-110 object-cover transition-all duration-550 flex lg:hidden"
-                  />
+                  {hero.profile ? (
+                    <Image
+                        src={hero.profile}
+                        width={370}
+                        height={370}
+                        alt=""
+                        className="hover:scale-110 object-cover rounded-2xl transition-all duration-550 hidden lg:flex"
+                      />
+                  ) : (
+                    <>
+                      <div className="hidden lg:flex w-92.5 h-92.5 bg-white/5"></div>
+                      <div className="flex lg:hidden w-25 h-25 bg-white/5"></div>
+                    </>
+                  )}
                   <div className={`absolute rounded-2xl inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-${themeBGColor} via-${themeBGColor}/60 to-transparent pointer-events-none`}></div>
                   <div className="absolute w-1/17 h-1/20 border-t border-l left-5 top-5 border-cyan-500/40 pointer-events-none"></div>
                   <div className="absolute w-1/17 h-1/20 border-t border-r right-5 top-5 border-cyan-500/40 pointer-events-none"></div>
@@ -177,7 +314,7 @@ export default function Home() {
                   <h5 className="text-[.6rem] lg:text-sm text-cyan-500 flex justify-start items-center space-x-2">
                     <span className="text-rose-400">npm</span> 
                     <span className={`${themeFont}`}>i</span> 
-                    <span>software-engineer</span>
+                    <span>{hero.subtitle}</span>
                     <span className="text-gray-500">--full-stack</span>
                     </h5>
                 </div>
@@ -187,7 +324,7 @@ export default function Home() {
                   </h1>
                 </div>
                 <p className="text-sm lg:text-lg break-normal lg:pr-30">
-                  I'm a software engineer and gamer based in Taguig City. I enjoy creating extraordinary things — sometimes a little overengineered.
+                  {hero.description}
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a href="#projects">
@@ -195,7 +332,7 @@ export default function Home() {
                       View_Projects
                     </button>
                   </a>
-                  <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="">
+                  <a href={contactHref || "#contacts"} target={contactHref ? "_blank" : undefined} className="">
                     <button className="btn-secondary-outline px-9 py-2 uppercase text-rose-400">
                       Contact_Me
                     </button>
@@ -208,7 +345,7 @@ export default function Home() {
                     <p className="uppercase text-sm">Years exp</p>
                   </div>
                   <div className="flex flex-col justify-center items-center space-y-1">
-                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">{projectCount-1}+</h4>
+                    <h4 className="text-cyan-500 text-glow-cyan text-4xl font-semibold">{projectCount}+</h4>
                     <p className="uppercase text-sm">Projects</p>
                   </div>
                   <div className="flex flex-col justify-center items-center space-y-1">
@@ -236,15 +373,7 @@ export default function Home() {
               </h2>
             </div>
             <p className={`text-sm lg:text-xl ${themeFont} leading-loose pr-10`}>
-                I’m a systems-oriented software engineer who enjoys breaking problems 
-                down to their fundamentals and rebuilding them into better solutions. 
-                I tend to question why a system exists before building it, which leads 
-                me to design architectures focused on maintainability, performance, and 
-                long-term scalability. Recently, I’ve been exploring AI-driven applications 
-                and how intelligent systems can support better decision-making.
-  
-                <br/><br/>Outside of coding, I enjoy bending the rules of the games I play, 
-                the food I cook, and sometimes, just a normal person binging K-Drama and Anime.
+                {aboutText}
               </p>
           </div>
           <div className="px-10 lg:w-1/2 space-y-4 h-full">
@@ -266,7 +395,7 @@ export default function Home() {
           </div>
           <div className="flex lg:flex-row flex-col justify-between items-start w-full lg:h-130 gap-10">
             <div className="flex justify-center items-center p-10 gap-10 w-full lg:w-3/5 bg-linear-to-br h-fit lg:h-full from-cyan-500/50 via-transparent to-pink-500/50 rounded-2xl">
-                {allWorkExp.map((work, index) => (
+                {workExperiences.map((work, index) => (
                   <div key={index} className="">
                     <img  src={`${work.link}`} alt="" onClick={() => (switchWork(work.tag))} className="hover:scale-105 active:scale-100 transition-all duration-100 ring-2 ring-cyan-500 rounded-full lg:h-40 lg:w-40 h-20 w-20 cursor-pointer shadow-2xl" />
                   </div>
@@ -317,11 +446,11 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] w-full gap-4">
-            {allSkill.map((allSkill, index) => (
+            {skills.map((skillBlock, index) => (
               <div key={index} className="flex-1 border border-cyan-400/40 bg-glow-cyan p-10 bg-cyan-100/5 space-y-3">
-                <h3 className="uppercase text-rose-500 font-bold">// {allSkill.title}</h3>
+                <h3 className="uppercase text-rose-500 font-bold">// {skillBlock.title}</h3>
                 <ul key={index} className="space-y-4">
-                  {allSkill.skillSet.map((name, index) => (
+                  {skillBlock.skillSet.map((name, index) => (
                     <li key={index} className="flex items-start group">
                       <span>
                         <Cpu className="w-5 h-5 text-cyan-400 group-hover:text-rose-500 mt-1 mr-4" />
@@ -347,7 +476,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2  w-full mt-4 gap-4">
-            {allProjects.map((project, index) => (
+            {projects.map((project, index) => (
               <div key={index} className="p-8 w-full space-y-4 border border-cyan-400/40 bg-glow-cyan bg-cyan-100/5">
                 <div className="flex justify-between">
                   <h4 className="text-xl text-cyan-400 font-bold space-x-3">
@@ -384,7 +513,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 w-full mt-10 gap-4">
-            {allCert.map((cert, index) => (
+            {certifications.map((cert, index) => (
               <div key={index} className="p-5 w-full space-y-1 border bg-glow-cyan border-cyan-400/40 bg-cyan-100/5">
                 <Award size={30} className="text-rose-500"/>
                 <h4 className={`text-lg ${themeFont} font-bold`}>{cert.title}</h4>
@@ -412,7 +541,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 w-full mt-10 gap-4">
-            {allReco.map((recommendation, index) => (
+            {recommendations.map((recommendation, index) => (
               <div key={index} className="p-5 bg-glow-cyan w-full space-y-4 border border-cyan-400/40 bg-cyan-100/5">
                 <Quote size={25} className="text-cyan-500/40"/>
                 <p className="italic">"{recommendation.remark}"</p>
@@ -439,7 +568,7 @@ export default function Home() {
               <div className="border-b border-cyan-400 w-8"></div>
             </div>
             <p className="lg:w-1/2 text-center">Ready to connect? Whether it's a project, collaboration, or just a conversation about tech — my inbox is always open.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="">
+            <a href={contactHref || "#contacts"} target={contactHref ? "_blank" : undefined} className="">
               <button className={`uppercase btn-primary ${themeFontRev} font-mono text-lg px-10 py-4 flex bg-glow-cyan`}>
                 Send_Message&#40;&#41;
               </button>
@@ -455,7 +584,7 @@ export default function Home() {
               <a href="https://www.facebook.com/ricodere.711" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
                 <Facebook />
               </a>
-              <a href="https://mail.google.com/mail/?view=cm&to=thericodere@gmail.com" target="_blank" className="border border-cyan-500/50 p-3 cursor-pointer">
+              <a href={contactHref || "#contacts"} target={contactHref ? "_blank" : undefined} className="border border-cyan-500/50 p-3 cursor-pointer">
                 <Mail />
               </a>
             </div>
@@ -472,7 +601,15 @@ export default function Home() {
 }
 
 function formatExperience(startDate: string | Date): string {
+  if (!startDate) {
+    return "0+";
+  }
+
   const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) {
+    return "0+";
+  }
+
   const now = new Date();
 
   const diffMs = now.getTime() - start.getTime();

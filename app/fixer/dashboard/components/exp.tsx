@@ -3,7 +3,6 @@
 import { Plus, Trash } from "lucide-react";
 import { TextInput } from "./components";
 import { useTheme } from "@/app/context"
-import { allWorkExp } from "@/app/data";
 import { apiClient } from "@/app/services";
 import { useEffect, useState } from "react";
 import type { WorkExp } from "@/app/type";
@@ -24,7 +23,6 @@ export default function Experience(){
                 setExperiences(response.data)
             } catch (error) {
                 console.error("Error fetching experiences:", error)
-                setExperiences(allWorkExp)
             } finally {
                 setLoading(false)
             }
