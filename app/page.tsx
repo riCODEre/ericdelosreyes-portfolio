@@ -372,7 +372,7 @@ export default function Home() {
                 <span className={`${themeFont}`}>About_Me</span>
               </h2>
             </div>
-            <p className={`text-sm lg:text-xl ${themeFont} leading-loose pr-10`}>
+            <p className={`text-sm lg:text-xl ${themeFont} whitespace-pre-line leading-loose pr-10`}>
                 {aboutText}
               </p>
           </div>
