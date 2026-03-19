@@ -39,7 +39,7 @@ export default function Fixer(){
             <div className="px-8 py-9 border border-cyan-400/40 bg-cyan-500/10 rounded-xl w-1/4 space-y-5">
                 <div className="space-y-1">
                     <p className="pl-1">Email</p>
-                    <label htmlFor="loginEmail" className={`input ${bgTheme} ${bgFont} border border-gray-500/40 py-6 px-4!`}>
+                    <label htmlFor="loginEmail" className={`input ${bgTheme} ${bgFont} w-full border border-gray-500/40 py-6 px-4!`}>
                         <div className="mr-2">
                             <Mail className="w-4 h-4 text-gray-500"/>
                         </div>
@@ -50,7 +50,7 @@ export default function Fixer(){
                 </div>
                 <div className="space-y-1 w-full">
                     <p className="pl-1">Password</p>
-                    <label htmlFor="loginPass" className={`input ${bgTheme} ${bgFont} border border-gray-500/40 py-6 px-4!`}>
+                    <label htmlFor="loginPass" className={`input ${bgTheme} ${bgFont} border border-gray-500/40 py-6 px-4! w-full`}>
                         <div className="mr-2">
                             <Lock className="w-4 h-4 text-gray-500"/>
                         </div>
