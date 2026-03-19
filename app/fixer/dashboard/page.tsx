@@ -3,6 +3,7 @@
 import { useState, } from "react"
 import { useTheme } from "../../context"
 import { Menu } from "./type"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import About from "./components/about"
 import Certifications from "./components/certs"
@@ -11,10 +12,12 @@ import Hero from "./components/hero"
 import Projects from "./components/projects"
 import Recommendations from "./components/recs"
 import Skills from "./components/skills"
+import { logoutUser } from "../services"
 
 import { Phone, Quote, Award, FolderOpen, Code, Briefcase, User, Home, Icon, SquareArrowRightExit, Save, RotateCcw, Moon, Sun } from "lucide-react"
 
 export default function Dashboard(){
+    const router = useRouter()
 
     const menu: Menu[] = [
         { name: "Hero", Icon: Home, Comp: Hero },
@@ -50,6 +53,16 @@ export default function Dashboard(){
         }
     }
 
+    async function handleLogout() {
+        try {
+            await logoutUser()
+        } catch (error) {
+            console.error("Logout error:", error)
+        } finally {
+            router.push("/fixer")
+        }
+    }
+
     return (
         <div className={`w-full min-h-screen flex ${bgTheme} ${bgFont}`}>
             {/* Will contain sidebar */}
@@ -70,14 +83,14 @@ export default function Dashboard(){
                     </div>
                 </div>
                 <div className="w-full border-cyan-500/20 p-6 space-y-1 border-t text-gray-500 text-sm">
-                    <Link href="/" className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-white/10 hover:text-white/90 hover:${bgFont}`}>
+                    <Link href="/" target="_blank" className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-white/10 hover:text-white/90 hover:${bgFont}`}>
                         <Home className="w-4 h-4"/>
                         <span>View Site</span>
                     </Link>
-                    <Link href="" className={`flex items-center space-x-3 px-4 py-2 rounded-lg text-red-500/90 hover:bg-white/10 hover:text-white/90 hover:${bgFont}`}>
+                    <button type="button" onClick={handleLogout} className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-red-500/90 hover:bg-white/10 hover:text-white/90 hover:${bgFont}`}>
                         <SquareArrowRightExit className="w-4 h-4"/>
                         <span>Logout</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
             {/* Will contain dashboard content */}
