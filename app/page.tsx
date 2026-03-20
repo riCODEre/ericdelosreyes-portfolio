@@ -319,7 +319,7 @@ export default function Home() {
                     </h5>
                 </div>
                 <div className="flex flex-col space-x-0 leading-20">
-                  <h1 className={`${themeFont} font-extrabold text-4xl lg:text-[5rem] transition-all duration-300 [word-spacing:-0.4em]`}>{greeting}
+                  <h1 className={`${themeFont} font-extrabold font-mono text-4xl lg:text-[5rem] transition-all tracking-tighter duration-300 [word-spacing:-0.4em]`}>{greeting}
                     <span className="animate-ping duration-2000 text-cyan-500">|</span>
                   </h1>
                 </div>
@@ -327,9 +327,9 @@ export default function Home() {
                   {hero.description}
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <a href="#projects">
+                  <a href="/files/EricDelosReyes_Resume_Current.pdf" download className="">
                     <button className={`btn-primary px-9 py-2 uppercase ${themeFontRev} transition-all duration-300`}>
-                      View_Projects
+                      Get_Resume
                     </button>
                   </a>
                   <a href={contactHref || "#contacts"} target={contactHref ? "_blank" : undefined} className="">
@@ -337,6 +337,7 @@ export default function Home() {
                       Contact_Me
                     </button>
                   </a>
+
                   
                 </div>
                 <div className="flex justify-start items-end space-x-6 mt-4">
