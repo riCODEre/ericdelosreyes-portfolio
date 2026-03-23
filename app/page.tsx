@@ -43,6 +43,7 @@ const EMPTY_WORK: WorkExp = {
 export default function Home() {
   // all UseState
   const {themeMode, toggleTheme} = useTheme()
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [hero, setHero] = useState<Hero>(DEFAULT_HERO)
   const [aboutText, setAboutText] = useState<string>(DEFAULT_ABOUT)
@@ -88,64 +89,67 @@ export default function Home() {
     let isMounted = true
 
     ;(async () => {
-      try {
-        const response = await apiClient.get("/hero/")
-        if (!isMounted) return
-        setHero(response.data)
-        setAboutText(response.data.about || DEFAULT_ABOUT)
-      } catch (error) {
-        console.error("Error fetching hero:", error)
+      const results = await Promise.allSettled([
+        apiClient.get("/hero/"),
+        apiClient.get("/exp/"),
+        apiClient.get("/skills/"),
+        apiClient.get("/projects/"),
+        apiClient.get("/certifications/"),
+        apiClient.get("/recommendations/"),
+      ])
+
+      if (!isMounted) return
+
+      const [heroResult, expResult, skillsResult, projectsResult, certsResult, recsResult] = results
+
+      if (heroResult.status === "fulfilled") {
+        setHero(heroResult.value.data)
+        setAboutText(heroResult.value.data.about || DEFAULT_ABOUT)
+      } else {
+        console.error("Error fetching hero:", heroResult.reason)
       }
 
-      try {
-        const response = await apiClient.get("/exp/")
-        if (!isMounted) return
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setWorkExperiences(response.data)
+      if (expResult.status === "fulfilled") {
+        if (Array.isArray(expResult.value.data) && expResult.value.data.length > 0) {
+          setWorkExperiences(expResult.value.data)
         }
-      } catch (error) {
-        console.error("Error fetching experiences:", error)
+      } else {
+        console.error("Error fetching experiences:", expResult.reason)
       }
 
-      try {
-        const response = await apiClient.get("/skills/")
-        if (!isMounted) return
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setSkills(response.data)
+      if (skillsResult.status === "fulfilled") {
+        if (Array.isArray(skillsResult.value.data) && skillsResult.value.data.length > 0) {
+          setSkills(skillsResult.value.data)
         }
-      } catch (error) {
-        console.error("Error fetching skills:", error)
+      } else {
+        console.error("Error fetching skills:", skillsResult.reason)
       }
 
-      try {
-        const response = await apiClient.get("/projects/")
-        if (!isMounted) return
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setProjects(response.data)
+      if (projectsResult.status === "fulfilled") {
+        if (Array.isArray(projectsResult.value.data) && projectsResult.value.data.length > 0) {
+          setProjects(projectsResult.value.data)
         }
-      } catch (error) {
-        console.error("Error fetching projects:", error)
+      } else {
+        console.error("Error fetching projects:", projectsResult.reason)
       }
 
-      try {
-        const response = await apiClient.get("/certifications/")
-        if (!isMounted) return
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setCertifications(response.data)
+      if (certsResult.status === "fulfilled") {
+        if (Array.isArray(certsResult.value.data) && certsResult.value.data.length > 0) {
+          setCertifications(certsResult.value.data)
         }
-      } catch (error) {
-        console.error("Error fetching certifications:", error)
+      } else {
+        console.error("Error fetching certifications:", certsResult.reason)
       }
 
-      try {
-        const response = await apiClient.get("/recommendations/")
-        if (!isMounted) return
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setRecommendations(response.data)
+      if (recsResult.status === "fulfilled") {
+        if (Array.isArray(recsResult.value.data) && recsResult.value.data.length > 0) {
+          setRecommendations(recsResult.value.data)
         }
-      } catch (error) {
-        console.error("Error fetching recommendations:", error)
+      } else {
+        console.error("Error fetching recommendations:", recsResult.reason)
       }
+
+      setIsLoading(false)
     })()
 
     return () => {
@@ -218,6 +222,14 @@ export default function Home() {
   }
 
 
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen w-full ${themeBG} flex items-center justify-center`}>
+        <span className="loading loading-spinner loading-lg text-cyan-500"></span>
+      </div>
+    )
+  }
 
   return (
     <div className="text-gray-500 min-h-screen">
