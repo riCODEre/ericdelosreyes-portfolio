@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/app/context"
 import { TextInput } from "./components"
-import { Plus, Trash } from "lucide-react"
+import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
 import { useEffect, useState } from "react"
 import type { Cert } from "@/app/type"
@@ -35,6 +35,18 @@ export default function Certifications(){
         setIsDirty(true)
     }
 
+    const handleMoveCertification = (index: number, direction: "up" | "down") => {
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= certifications.length) return
+
+        setCertifications((prev) => {
+            const next = [...prev]
+            ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+            return next
+        })
+        setIsDirty(true)
+    }
+
     const handleAddCertification = async () => {
         try {
             const response = await apiClient.post("/certifications/", {
@@ -42,6 +54,7 @@ export default function Certifications(){
                 issuer: "",
                 year: new Date().getFullYear(),
                 link: "",
+                sortOrder: certifications.length,
             })
             setCertifications((prev) => [...prev, response.data])
             setIsDirty(false)
@@ -53,12 +66,13 @@ export default function Certifications(){
     const handleSave = async () => {
         try {
             const updatedRows = await Promise.all(
-                certifications.map(async (cert) => {
+                certifications.map(async (cert, index) => {
                     const payload = {
                         title: cert.title,
                         issuer: cert.issuer,
                         year: Number(cert.year) || 0,
                         link: cert.link,
+                        sortOrder: index,
                     }
 
                     if (cert.id) {
@@ -116,7 +130,27 @@ export default function Certifications(){
                     <div key={cert.id ?? index} className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
                         <div className="flex justify-between space-x-2 items-center">
                             <h3 className="text-sm text-cyan-500">#{index + 1}</h3>
-                            <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteCertification(index)} />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveCertification(index, "up")}
+                                    disabled={index === 0}
+                                    aria-label={`Move certification ${index + 1} up`}
+                                >
+                                    <ArrowUp size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveCertification(index, "down")}
+                                    disabled={index === certifications.length - 1}
+                                    aria-label={`Move certification ${index + 1} down`}
+                                >
+                                    <ArrowDown size={16} />
+                                </button>
+                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteCertification(index)} />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <TextInput inputFor={`cert-title-${index}`} text="Title" placeholder="..." value={cert.title} onChange={(e) => updateCertification(index, { title: e.target.value })}/>

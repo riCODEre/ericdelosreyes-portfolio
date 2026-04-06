@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Trash } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react";
 import { TextInput } from "./components";
 import { useTheme } from "@/app/context"
 import { apiClient } from "@/app/services";
@@ -34,6 +34,18 @@ export default function Experience(){
         setIsDirty(true)
     }
 
+    const handleMoveExperience = (index: number, direction: "up" | "down") => {
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= experiences.length) return
+
+        setExperiences((prev) => {
+            const next = [...prev]
+            ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+            return next
+        })
+        setIsDirty(true)
+    }
+
     const handleAddExperience = async () => {
         try {
             const payload = {
@@ -44,6 +56,7 @@ export default function Experience(){
                 company: "",
                 desc: [""],
                 skill: [""],
+                sortOrder: experiences.length,
             }
             const response = await apiClient.post("/exp/", payload)
             setExperiences((prev) => [...prev, response.data])
@@ -56,7 +69,7 @@ export default function Experience(){
     const handleSave = async () => {
         try {
             const updates = await Promise.all(
-                experiences.map(async (exp) => {
+                experiences.map(async (exp, index) => {
                     const payload = {
                         tag: exp.tag,
                         link: exp.link,
@@ -65,6 +78,7 @@ export default function Experience(){
                         company: exp.company,
                         desc: exp.desc,
                         skill: exp.skill,
+                        sortOrder: index,
                     }
                     const response = await apiClient.put(`/exp/${exp.id}`, payload)
                     return response.data as WorkExp
@@ -133,6 +147,26 @@ export default function Experience(){
                 )}
                 {experiences.map((exp, key) => (
                     <div key={exp.id} className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
+                        <div className="flex justify-end gap-2 items-center">
+                            <button
+                                type="button"
+                                className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                onClick={() => handleMoveExperience(key, "up")}
+                                disabled={key === 0}
+                                aria-label={`Move experience ${key + 1} up`}
+                            >
+                                <ArrowUp size={16} />
+                            </button>
+                            <button
+                                type="button"
+                                className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                onClick={() => handleMoveExperience(key, "down")}
+                                disabled={key === experiences.length - 1}
+                                aria-label={`Move experience ${key + 1} down`}
+                            >
+                                <ArrowDown size={16} />
+                            </button>
+                        </div>
                         <div className="grid grid-cols-2 gap-6">
                             <TextInput inputFor={`exp-role-${exp.id}`} text="Position" placeholder="..." value={exp.position} onChange={(e) => updateExperience(key, { position: e.target.value })}/>
                             <TextInput inputFor={`exp-company-${exp.id}`} text="Company" placeholder="..." value={exp.company} onChange={(e) => updateExperience(key, { company: e.target.value })}/>

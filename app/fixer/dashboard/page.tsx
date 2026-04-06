@@ -38,8 +38,6 @@ export default function Dashboard(){
     const bgFontHover = themeMode === 'light' ? 'hover:text-black' : 'hover:text-white'
     const bgThemeHover = themeMode === 'light' ? 'hover:bg-black/10' : 'hover:bg-white/10'
 
-    
-
     function ThemeButton (){
         if (themeMode === 'light') {
         return (

@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
-import { Plus, Trash } from "lucide-react"
+import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
 import { useEffect, useState } from "react"
 import type { Recommendation } from "@/app/type"
@@ -35,12 +35,25 @@ export default function Recommendations(){
         setIsDirty(true)
     }
 
+    const handleMoveRecommendation = (index: number, direction: "up" | "down") => {
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= recommendations.length) return
+
+        setRecommendations((prev) => {
+            const next = [...prev]
+            ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+            return next
+        })
+        setIsDirty(true)
+    }
+
     const handleAddRecommendation = async () => {
         try {
             const response = await apiClient.post("/recommendations/", {
                 name: "",
                 positionCompany: "",
                 remark: "",
+                sortOrder: recommendations.length,
             })
             setRecommendations((prev) => [...prev, response.data])
             setIsDirty(false)
@@ -52,11 +65,12 @@ export default function Recommendations(){
     const handleSave = async () => {
         try {
             const updatedRows = await Promise.all(
-                recommendations.map(async (reco) => {
+                recommendations.map(async (reco, index) => {
                     const payload = {
                         name: reco.name,
                         positionCompany: reco.positionCompany,
                         remark: reco.remark,
+                        sortOrder: index,
                     }
 
                     if (reco.id) {
@@ -114,7 +128,27 @@ export default function Recommendations(){
                     <div key={reco.id ?? index} className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
                         <div className="flex justify-between space-x-2 items-center">
                             <h3 className="text-sm text-cyan-500">#{index + 1}</h3>
-                            <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteRecommendation(index)} />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveRecommendation(index, "up")}
+                                    disabled={index === 0}
+                                    aria-label={`Move recommendation ${index + 1} up`}
+                                >
+                                    <ArrowUp size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveRecommendation(index, "down")}
+                                    disabled={index === recommendations.length - 1}
+                                    aria-label={`Move recommendation ${index + 1} down`}
+                                >
+                                    <ArrowDown size={16} />
+                                </button>
+                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteRecommendation(index)} />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <TextInput inputFor={`recs-name-${index}`} text="Name" placeholder="..." value={reco.name} onChange={(e) => updateRecommendation(index, { name: e.target.value })}/>

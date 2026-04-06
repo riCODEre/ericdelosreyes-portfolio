@@ -13,10 +13,12 @@ export type Hero = {
 }
 
 export type Cert = {
+    id?: number
     title: string
     issuer: string
     year: number
     link: string
+    sortOrder?: number
 }
 
 export type Project = {
@@ -26,6 +28,7 @@ export type Project = {
     desc: string
     link: string
     skill: string[]
+    sortOrder?: number
 }
 
 export type WorkExp = {
@@ -37,6 +40,7 @@ export type WorkExp = {
     company: string
     desc: string[]
     skill: string[]
+    sortOrder?: number
 }
 
 export type Skill = {
@@ -45,9 +49,11 @@ export type Skill = {
 }
 
 export type Recommendation = {
+    id?: number
     name: string
     positionCompany: string
     remark: string 
+    sortOrder?: number
 }
 
 export type Nav = {

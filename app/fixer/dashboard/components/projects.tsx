@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
-import { Plus, Trash } from "lucide-react"
+import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
 import { useEffect, useState } from "react"
 import type { Project } from "@/app/type"
@@ -33,6 +33,18 @@ export default function Projects(){
         setIsDirty(true)
     }
 
+    const handleMoveProject = (index: number, direction: "up" | "down") => {
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= projects.length) return
+
+        setProjects((prev) => {
+            const next = [...prev]
+            ;[next[index], next[targetIndex]] = [next[targetIndex], next[index]]
+            return next
+        })
+        setIsDirty(true)
+    }
+
     const handleAddProject = async () => {
         try {
             const payload = {
@@ -41,6 +53,7 @@ export default function Projects(){
                 desc: "",
                 link: "",
                 skill: [""],
+                sortOrder: projects.length,
             }
             const response = await apiClient.post("/projects/", payload)
             setProjects((prev) => [...prev, response.data])
@@ -53,13 +66,14 @@ export default function Projects(){
     const handleSave = async () => {
         try {
             const updatedRows = await Promise.all(
-                projects.map(async (project) => {
+                projects.map(async (project, index) => {
                     const payload = {
                         title: project.title,
                         type: project.type,
                         desc: project.desc,
                         link: project.link,
                         skill: project.skill,
+                        sortOrder: index,
                     }
 
                     try {
@@ -128,7 +142,27 @@ export default function Projects(){
                     <div key={project.id ?? key} className="border border-cyan-500/20 bg-cyan-500/5 p-5 rounded-xl space-y-4">
                         <div className="flex justify-between space-x-2 items-center">
                             <h3 className="text-sm text-cyan-500">#{key + 1}</h3>
-                            <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteProject(key)} />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveProject(key, "up")}
+                                    disabled={key === 0}
+                                    aria-label={`Move project ${key + 1} up`}
+                                >
+                                    <ArrowUp size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-cyan-400 hover:text-cyan-200 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                    onClick={() => handleMoveProject(key, "down")}
+                                    disabled={key === projects.length - 1}
+                                    aria-label={`Move project ${key + 1} down`}
+                                >
+                                    <ArrowDown size={16} />
+                                </button>
+                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteProject(key)} />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <TextInput inputFor={`proj-title-${key}`} text="Title" placeholder="..." value={project.title} onChange={(e) => updateProject(key, { title: e.target.value })}/>
