@@ -232,7 +232,7 @@ export default function Home() {
   }
 
   return (
-    <div className="text-gray-500 min-h-screen">
+    <div className="text-gray-500 min-h-screen text">
       <header className={` border-b border-gray-500/30 ${navThemeBG} backdrop-blur-sm min-w-screen font-mono text-sm py-4 px-5 lg:px-20 fixed top-0 right-0 left-0 z-50`}>
         <nav className="flex justify-between items-center">
           <a type="" href="#" className={`uppercase ${themeFont} text-lg font-bold  [word-spacing:-0.4em]`} >
