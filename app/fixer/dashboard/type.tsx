@@ -9,12 +9,16 @@ export type Input = {
     inputFor: string
     text: string
     placeholder: string
-    value?: any
+    value?: string | number
     type?: string
     className?: string
     onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
+export type SaveStatus = "idle" | "saving" | "success" | "error";
+
 export type NavProps = {
   onClickSave: () => void;
+  saveStatus?: SaveStatus;
+  errorMessage?: string;
 };

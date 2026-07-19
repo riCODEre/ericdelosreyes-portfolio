@@ -4,9 +4,11 @@ import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
 import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import type { Recommendation } from "@/app/type"
+import type { SaveStatus } from "../type"
 import Nav from "./nav"
+import ConfirmDialog from "./confirm-dialog"
 
 type RecommendationRow = Recommendation & { id?: number }
 
@@ -16,6 +18,11 @@ export default function Recommendations(){
     const [recommendations, setRecommendations] = useState<RecommendationRow[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [isDirty, setIsDirty] = useState<boolean>(false)
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+    const [errorMessage, setErrorMessage] = useState<string>("")
+    const [isAddingRecommendation, setIsAddingRecommendation] = useState<boolean>(false)
+    const [pendingDeleteRecommendation, setPendingDeleteRecommendation] = useState<number | null>(null)
+    const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         ;(async () => {
@@ -28,6 +35,22 @@ export default function Recommendations(){
                 setLoading(false)
             }
         })()
+    }, [])
+
+    useEffect(() => {
+        function handleBeforeUnload(e: BeforeUnloadEvent) {
+            if (!isDirty) return
+            e.preventDefault()
+            e.returnValue = ""
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [isDirty])
+
+    useEffect(() => {
+        return () => {
+            if (saveStatusTimeoutRef.current) clearTimeout(saveStatusTimeoutRef.current)
+        }
     }, [])
 
     const updateRecommendation = (index: number, patch: Partial<RecommendationRow>) => {
@@ -48,6 +71,8 @@ export default function Recommendations(){
     }
 
     const handleAddRecommendation = async () => {
+        if (isAddingRecommendation) return
+        setIsAddingRecommendation(true)
         try {
             const response = await apiClient.post("/recommendations/", {
                 name: "",
@@ -56,13 +81,31 @@ export default function Recommendations(){
                 sortOrder: recommendations.length,
             })
             setRecommendations((prev) => [...prev, response.data])
-            setIsDirty(false)
         } catch (error) {
             console.error("Error creating recommendation:", error)
+        } finally {
+            setIsAddingRecommendation(false)
         }
     }
 
+    const validate = (): string | null => {
+        for (let i = 0; i < recommendations.length; i++) {
+            if (!recommendations[i].name.trim()) return `Recommendation #${i + 1} is missing a name.`
+        }
+        return null
+    }
+
     const handleSave = async () => {
+        if (saveStatus === "saving") return
+
+        const validationError = validate()
+        if (validationError) {
+            setSaveStatus("error")
+            setErrorMessage(validationError)
+            return
+        }
+
+        setSaveStatus("saving")
         try {
             const updatedRows = await Promise.all(
                 recommendations.map(async (reco, index) => {
@@ -85,9 +128,15 @@ export default function Recommendations(){
 
             setRecommendations(updatedRows)
             setIsDirty(false)
+            setSaveStatus("success")
         } catch (error) {
             console.error("Error saving recommendations:", error)
+            setErrorMessage("Error saving recommendations. Please try again.")
+            setSaveStatus("error")
+            return
         }
+
+        saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500)
     }
 
     const handleDeleteRecommendation = async (index: number) => {
@@ -98,7 +147,6 @@ export default function Recommendations(){
                 await apiClient.delete(`/recommendations/${target.id}`)
             }
             setRecommendations((prev) => prev.filter((_, i) => i !== index))
-            setIsDirty(true)
         } catch (error) {
             console.error("Error deleting recommendation:", error)
         }
@@ -110,13 +158,18 @@ export default function Recommendations(){
 
     return (
         <div>
-            <Nav onClickSave={handleSave}/>
+            <Nav onClickSave={handleSave} saveStatus={saveStatus} errorMessage={errorMessage}/>
             <main className="p-6 text-gray-500 space-y-4">
                 <div className="flex w-full justify-between items-center">
                     <h2 className={`ml-2 ${themeFont}`}>Recommendations</h2>
-                    <button className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2" onClick={handleAddRecommendation}>
+                    <button
+                        type="button"
+                        className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        onClick={handleAddRecommendation}
+                        disabled={isAddingRecommendation}
+                    >
                         <Plus size={15} />
-                        <span>Add</span>
+                        <span>{isAddingRecommendation ? "Adding..." : "Add"}</span>
                     </button>
                 </div>
                 {recommendations.length === 0 && (
@@ -147,7 +200,14 @@ export default function Recommendations(){
                                 >
                                     <ArrowDown size={16} />
                                 </button>
-                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteRecommendation(index)} />
+                                <button
+                                    type="button"
+                                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                                    onClick={() => setPendingDeleteRecommendation(index)}
+                                    aria-label={`Delete recommendation ${index + 1}`}
+                                >
+                                    <Trash size={18} />
+                                </button>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -160,6 +220,16 @@ export default function Recommendations(){
                 ))}
                 <p className="text-xs text-gray-500">{isDirty ? "Unsaved changes" : "Saved"}</p>
             </main>
+            <ConfirmDialog
+                open={pendingDeleteRecommendation !== null}
+                title="Delete Recommendation"
+                message="This will permanently delete this recommendation and cannot be undone."
+                onConfirm={() => {
+                    if (pendingDeleteRecommendation !== null) handleDeleteRecommendation(pendingDeleteRecommendation)
+                    setPendingDeleteRecommendation(null)
+                }}
+                onCancel={() => setPendingDeleteRecommendation(null)}
+            />
         </div>
     )
 }

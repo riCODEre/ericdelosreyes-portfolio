@@ -4,9 +4,12 @@ import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
 import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
-import { useEffect, useState } from "react"
+import axios from "axios"
+import { useEffect, useState, useRef } from "react"
 import type { Project } from "@/app/type"
+import type { SaveStatus } from "../type"
 import Nav from "./nav"
+import ConfirmDialog from "./confirm-dialog"
 
 export default function Projects(){
     const { themeMode } = useTheme()
@@ -14,6 +17,12 @@ export default function Projects(){
     const [projects, setProjects] = useState<Project[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [isDirty, setIsDirty] = useState<boolean>(false)
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+    const [errorMessage, setErrorMessage] = useState<string>("")
+    const [isAddingProject, setIsAddingProject] = useState<boolean>(false)
+    const [pendingDeleteProject, setPendingDeleteProject] = useState<number | null>(null)
+    const [pendingDeleteSkill, setPendingDeleteSkill] = useState<{ index: number; skillIndex: number } | null>(null)
+    const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         ;(async () => {
@@ -26,6 +35,22 @@ export default function Projects(){
                 setLoading(false)
             }
         })()
+    }, [])
+
+    useEffect(() => {
+        function handleBeforeUnload(e: BeforeUnloadEvent) {
+            if (!isDirty) return
+            e.preventDefault()
+            e.returnValue = ""
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [isDirty])
+
+    useEffect(() => {
+        return () => {
+            if (saveStatusTimeoutRef.current) clearTimeout(saveStatusTimeoutRef.current)
+        }
     }, [])
 
     const updateProject = (index: number, patch: Partial<Project>) => {
@@ -46,6 +71,8 @@ export default function Projects(){
     }
 
     const handleAddProject = async () => {
+        if (isAddingProject) return
+        setIsAddingProject(true)
         try {
             const payload = {
                 title: "New Project",
@@ -57,13 +84,31 @@ export default function Projects(){
             }
             const response = await apiClient.post("/projects/", payload)
             setProjects((prev) => [...prev, response.data])
-            setIsDirty(false)
         } catch (error) {
             console.error("Error creating project:", error)
+        } finally {
+            setIsAddingProject(false)
         }
     }
 
+    const validate = (): string | null => {
+        for (let i = 0; i < projects.length; i++) {
+            if (!projects[i].title.trim()) return `Project #${i + 1} is missing a title.`
+        }
+        return null
+    }
+
     const handleSave = async () => {
+        if (saveStatus === "saving") return
+
+        const validationError = validate()
+        if (validationError) {
+            setSaveStatus("error")
+            setErrorMessage(validationError)
+            return
+        }
+
+        setSaveStatus("saving")
         try {
             const updatedRows = await Promise.all(
                 projects.map(async (project, index) => {
@@ -79,8 +124,8 @@ export default function Projects(){
                     try {
                         const updated = await apiClient.put(`/projects/${project.id}`, payload)
                         return updated.data as Project
-                    } catch (error: any) {
-                        if (error?.response?.status === 404) {
+                    } catch (error) {
+                        if (axios.isAxiosError(error) && error.response?.status === 404) {
                             const created = await apiClient.post("/projects/", payload)
                             return created.data as Project
                         }
@@ -91,9 +136,15 @@ export default function Projects(){
 
             setProjects(updatedRows)
             setIsDirty(false)
+            setSaveStatus("success")
         } catch (error) {
             console.error("Error saving projects:", error)
+            setErrorMessage("Error saving projects. Please try again.")
+            setSaveStatus("error")
+            return
         }
+
+        saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500)
     }
 
     const handleDeleteProject = async (index: number) => {
@@ -102,7 +153,6 @@ export default function Projects(){
         try {
             await apiClient.delete(`/projects/${target.id}`)
             setProjects((prev) => prev.filter((_, i) => i !== index))
-            setIsDirty(true)
         } catch (error) {
             console.error("Error deleting project:", error)
         }
@@ -124,13 +174,18 @@ export default function Projects(){
 
     return (
         <div>
-            <Nav onClickSave={handleSave}/>
+            <Nav onClickSave={handleSave} saveStatus={saveStatus} errorMessage={errorMessage}/>
             <main className="p-6 text-gray-500 space-y-4">
                 <div className="flex w-full justify-between items-center">
                     <h2 className={`ml-2 ${themeFont}`}>Projects</h2>
-                    <button className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2" onClick={handleAddProject}>
+                    <button
+                        type="button"
+                        className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        onClick={handleAddProject}
+                        disabled={isAddingProject}
+                    >
                         <Plus size={15} />
-                        <span>Add</span>
+                        <span>{isAddingProject ? "Adding..." : "Add"}</span>
                     </button>
                 </div>
                 {projects.length === 0 && (
@@ -161,7 +216,14 @@ export default function Projects(){
                                 >
                                     <ArrowDown size={16} />
                                 </button>
-                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteProject(key)} />
+                                <button
+                                    type="button"
+                                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                                    onClick={() => setPendingDeleteProject(key)}
+                                    aria-label={`Delete project ${key + 1}`}
+                                >
+                                    <Trash size={18} />
+                                </button>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -178,10 +240,17 @@ export default function Projects(){
                                         next[skillkey] = e.target.value
                                         updateProject(key, { skill: next })
                                     }}/>
-                                    <Trash size={16} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteSkill(key, skillkey)} />
+                                    <button
+                                        type="button"
+                                        className="text-red-500 hover:text-red-700 cursor-pointer"
+                                        onClick={() => setPendingDeleteSkill({ index: key, skillIndex: skillkey })}
+                                        aria-label={`Delete skill ${skillkey + 1} from project ${key + 1}`}
+                                    >
+                                        <Trash size={16} />
+                                    </button>
                                 </div>
                             ))}
-                            <button className="flex items-center space-x-2 text-xs text-cyan-400 hover:text-cyan-700" onClick={() => handleAddSkill(key)}>
+                            <button type="button" className="flex items-center space-x-2 text-xs text-cyan-400 hover:text-cyan-700" onClick={() => handleAddSkill(key)}>
                                 <Plus size={15} className=" " />
                                 <span>Add Skill</span>
                             </button>
@@ -191,6 +260,26 @@ export default function Projects(){
                 ))}
                 <p className="text-xs text-gray-500">{isDirty ? "Unsaved changes" : "Saved"}</p>
             </main>
+            <ConfirmDialog
+                open={pendingDeleteProject !== null}
+                title="Delete Project"
+                message="This will permanently delete this project and cannot be undone."
+                onConfirm={() => {
+                    if (pendingDeleteProject !== null) handleDeleteProject(pendingDeleteProject)
+                    setPendingDeleteProject(null)
+                }}
+                onCancel={() => setPendingDeleteProject(null)}
+            />
+            <ConfirmDialog
+                open={pendingDeleteSkill !== null}
+                title="Delete Skill"
+                message="This will remove this skill from the project. The change is saved once you click Save."
+                onConfirm={() => {
+                    if (pendingDeleteSkill) handleDeleteSkill(pendingDeleteSkill.index, pendingDeleteSkill.skillIndex)
+                    setPendingDeleteSkill(null)
+                }}
+                onCancel={() => setPendingDeleteSkill(null)}
+            />
         </div>
     )
 }

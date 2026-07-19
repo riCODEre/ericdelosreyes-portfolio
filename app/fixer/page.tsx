@@ -1,11 +1,12 @@
 "use client"
 
 import { useTheme } from "../context"
-import { ArrowLeft, Lock, Mail } from "lucide-react"
+import { ArrowLeft, Lock, Mail, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { loginUser } from "./services"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 
 export default function Fixer(){
     const router = useRouter()
@@ -13,38 +14,51 @@ export default function Fixer(){
 
     const [loginEmail, setLoginEmail] = useState<string>("")
     const [loginPass, setLoginPass] = useState<string>("")
+    const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<string>("")
 
     const bgTheme = themeMode === 'light' ? 'bg-white' : 'bg-[#080A0C]'
     const bgFont = themeMode === 'light' ? 'text-black' : 'text-white'
 
-    async function handleLogin(){
+    async function handleLogin(e: React.FormEvent){
+        e.preventDefault()
+        if (isLoggingIn) return
+
+        setErrorMessage("")
+        setIsLoggingIn(true)
         try {
-            const response = await loginUser(loginEmail, loginPass)
-            console.log(response)
+            await loginUser(loginEmail, loginPass)
             router.push("/fixer/dashboard")
         } catch (error) {
             console.error("Login error:", error)
+            if (axios.isAxiosError(error) && error.response?.status === 400) {
+                setErrorMessage("Invalid email or password.")
+            } else {
+                setErrorMessage("Login failed. Please try again.")
+            }
+        } finally {
+            setIsLoggingIn(false)
         }
     }
 
     return (
         <main className={`w-full h-screen flex flex-col justify-center items-center ${bgTheme} ${bgFont} space-y-8`}>
             <div className="space-y-2 flex flex-col justify-center items-center">
-                <div className="border border-cyan-400/40 w-fit bg-cyan-500/10 p-6 rounded-xl cursor-pointer" onClick={toggleTheme}>
+                <button type="button" className="border border-cyan-400/40 w-fit bg-cyan-500/10 p-6 rounded-xl cursor-pointer" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
                     <Lock className="w-7 h-7 text-cyan-500"/>
-                </div>
+                </button>
                 <h2 className="font-mono lowercase text-3xl font-bold mt-2"><span className="text-cyan-500">Admin</span>.Login()</h2>
                 <p className="text-gray-500 text-sm">Portfolio Management System</p>
             </div>
-            <div className="px-8 py-9 border border-cyan-400/40 bg-cyan-500/10 rounded-xl w-1/4 space-y-5">
+            <form onSubmit={handleLogin} className="px-8 py-9 border border-cyan-400/40 bg-cyan-500/10 rounded-xl w-1/4 space-y-5">
                 <div className="space-y-1">
                     <p className="pl-1">Email</p>
                     <label htmlFor="loginEmail" className={`input ${bgTheme} ${bgFont} w-full border border-gray-500/40 py-6 px-4!`}>
                         <div className="mr-2">
                             <Mail className="w-4 h-4 text-gray-500"/>
                         </div>
-                        
-                        <input id="loginEmail" type="email" placeholder="admin@eric.dev" className="py-10!" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+
+                        <input id="loginEmail" type="email" placeholder="admin@eric.dev" className="py-10!" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required disabled={isLoggingIn} />
                     </label>
 
                 </div>
@@ -54,15 +68,19 @@ export default function Fixer(){
                         <div className="mr-2">
                             <Lock className="w-4 h-4 text-gray-500"/>
                         </div>
-                        
-                        <input id="loginPass" type="password" placeholder="••••••••" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} className="py-10!"/>
+
+                        <input id="loginPass" type="password" placeholder="••••••••" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} className="py-10!" required disabled={isLoggingIn} />
                     </label>
                 </div>
-                <button className="btn-primary py-3 rounded-xl w-full text-black/70 uppercase font-mono font-bold" onClick={() => (handleLogin())}>authenticate()</button>
- 
-                
-            </div>
-            
+                {errorMessage && (
+                    <p className="text-red-500 text-sm text-center" role="alert">{errorMessage}</p>
+                )}
+                <button type="submit" disabled={isLoggingIn} className="btn-primary py-3 rounded-xl w-full text-black/70 uppercase font-mono font-bold flex items-center justify-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isLoggingIn && <Loader2 className="w-4 h-4 animate-spin"/>}
+                    <span>{isLoggingIn ? "authenticating..." : "authenticate()"}</span>
+                </button>
+            </form>
+
             <Link href="/" className="text-cyan-500 hover:underline">
                 <ArrowLeft className="w-4 h-4 inline-block mr-1"/>
                 <span>back to portfolio</span>

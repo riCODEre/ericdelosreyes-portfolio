@@ -4,11 +4,15 @@ import { useTheme } from "@/app/context"
 import { TextInput } from "./components"
 import { ArrowDown, ArrowUp, Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import type { Cert } from "@/app/type"
+import type { SaveStatus } from "../type"
 import Nav from "./nav"
+import ConfirmDialog from "./confirm-dialog"
 
 type CertRow = Cert & { id?: number }
+
+const MIN_CERT_YEAR = 1950
 
 export default function Certifications(){
     const { themeMode } = useTheme()
@@ -16,6 +20,11 @@ export default function Certifications(){
     const [certifications, setCertifications] = useState<CertRow[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [isDirty, setIsDirty] = useState<boolean>(false)
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+    const [errorMessage, setErrorMessage] = useState<string>("")
+    const [isAddingCertification, setIsAddingCertification] = useState<boolean>(false)
+    const [pendingDeleteCertification, setPendingDeleteCertification] = useState<number | null>(null)
+    const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         ;(async () => {
@@ -28,6 +37,22 @@ export default function Certifications(){
                 setLoading(false)
             }
         })()
+    }, [])
+
+    useEffect(() => {
+        function handleBeforeUnload(e: BeforeUnloadEvent) {
+            if (!isDirty) return
+            e.preventDefault()
+            e.returnValue = ""
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [isDirty])
+
+    useEffect(() => {
+        return () => {
+            if (saveStatusTimeoutRef.current) clearTimeout(saveStatusTimeoutRef.current)
+        }
     }, [])
 
     const updateCertification = (index: number, patch: Partial<CertRow>) => {
@@ -48,6 +73,8 @@ export default function Certifications(){
     }
 
     const handleAddCertification = async () => {
+        if (isAddingCertification) return
+        setIsAddingCertification(true)
         try {
             const response = await apiClient.post("/certifications/", {
                 title: "New Certification",
@@ -57,20 +84,45 @@ export default function Certifications(){
                 sortOrder: certifications.length,
             })
             setCertifications((prev) => [...prev, response.data])
-            setIsDirty(false)
         } catch (error) {
             console.error("Error creating certification:", error)
+        } finally {
+            setIsAddingCertification(false)
         }
     }
 
+    const validate = (): string | null => {
+        const currentYear = new Date().getFullYear()
+        for (let i = 0; i < certifications.length; i++) {
+            const cert = certifications[i]
+            if (!cert.title.trim()) return `Certification #${i + 1} is missing a title.`
+
+            const yearNum = Number(cert.year)
+            if (Number.isNaN(yearNum) || yearNum < MIN_CERT_YEAR || yearNum > currentYear + 1) {
+                return `Certification #${i + 1} has an invalid year.`
+            }
+        }
+        return null
+    }
+
     const handleSave = async () => {
+        if (saveStatus === "saving") return
+
+        const validationError = validate()
+        if (validationError) {
+            setSaveStatus("error")
+            setErrorMessage(validationError)
+            return
+        }
+
+        setSaveStatus("saving")
         try {
             const updatedRows = await Promise.all(
                 certifications.map(async (cert, index) => {
                     const payload = {
                         title: cert.title,
                         issuer: cert.issuer,
-                        year: Number(cert.year) || 0,
+                        year: Number(cert.year),
                         link: cert.link,
                         sortOrder: index,
                     }
@@ -87,9 +139,15 @@ export default function Certifications(){
 
             setCertifications(updatedRows)
             setIsDirty(false)
+            setSaveStatus("success")
         } catch (error) {
             console.error("Error saving certifications:", error)
+            setErrorMessage("Error saving certifications. Please try again.")
+            setSaveStatus("error")
+            return
         }
+
+        saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500)
     }
 
     const handleDeleteCertification = async (index: number) => {
@@ -100,7 +158,6 @@ export default function Certifications(){
                 await apiClient.delete(`/certifications/${target.id}`)
             }
             setCertifications((prev) => prev.filter((_, i) => i !== index))
-            setIsDirty(true)
         } catch (error) {
             console.error("Error deleting certification:", error)
         }
@@ -112,13 +169,18 @@ export default function Certifications(){
 
     return (
         <div>
-            <Nav onClickSave={handleSave}/>
+            <Nav onClickSave={handleSave} saveStatus={saveStatus} errorMessage={errorMessage}/>
             <main className="p-6 text-gray-500 space-y-4">
                 <div className="flex w-full justify-between items-center">
                     <h2 className={`ml-2 ${themeFont}`}>Certifications</h2>
-                    <button className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2" onClick={handleAddCertification}>
+                    <button
+                        type="button"
+                        className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        onClick={handleAddCertification}
+                        disabled={isAddingCertification}
+                    >
                         <Plus size={15} />
-                        <span>Add</span>
+                        <span>{isAddingCertification ? "Adding..." : "Add"}</span>
                     </button>
                 </div>
                 {certifications.length === 0 && (
@@ -149,7 +211,14 @@ export default function Certifications(){
                                 >
                                     <ArrowDown size={16} />
                                 </button>
-                                <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteCertification(index)} />
+                                <button
+                                    type="button"
+                                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                                    onClick={() => setPendingDeleteCertification(index)}
+                                    aria-label={`Delete certification ${index + 1}`}
+                                >
+                                    <Trash size={18} />
+                                </button>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -162,6 +231,16 @@ export default function Certifications(){
                 ))}
                 <p className="text-xs text-gray-500">{isDirty ? "Unsaved changes" : "Saved"}</p>
             </main>
+            <ConfirmDialog
+                open={pendingDeleteCertification !== null}
+                title="Delete Certification"
+                message="This will permanently delete this certification and cannot be undone."
+                onConfirm={() => {
+                    if (pendingDeleteCertification !== null) handleDeleteCertification(pendingDeleteCertification)
+                    setPendingDeleteCertification(null)
+                }}
+                onCancel={() => setPendingDeleteCertification(null)}
+            />
         </div>
     )
 }

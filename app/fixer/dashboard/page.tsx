@@ -14,7 +14,7 @@ import Recommendations from "./components/recs"
 import Skills from "./components/skills"
 import { logoutUser } from "../services"
 
-import { Phone, Quote, Award, FolderOpen, Code, Briefcase, User, Home, Icon, SquareArrowRightExit, Save, RotateCcw, Moon, Sun } from "lucide-react"
+import { Quote, Award, FolderOpen, Code, Briefcase, User, Home, SquareArrowRightExit, Moon, Sun } from "lucide-react"
 
 export default function Dashboard(){
     const router = useRouter()
@@ -38,19 +38,6 @@ export default function Dashboard(){
     const bgFontHover = themeMode === 'light' ? 'hover:text-black' : 'hover:text-white'
     const bgThemeHover = themeMode === 'light' ? 'hover:bg-black/10' : 'hover:bg-white/10'
 
-    function ThemeButton (){
-        if (themeMode === 'light') {
-        return (
-            <Sun size={15}></Sun>
-        )
-        }
-        else{
-        return (
-            <Moon size={15}></Moon>
-        ) 
-        }
-    }
-
     async function handleLogout() {
         try {
             await logoutUser()
@@ -66,9 +53,14 @@ export default function Dashboard(){
             {/* Will contain sidebar */}
             <aside className="w-1/5 border-r flex flex-col justify-between border-cyan-500/20 font-mono">
                 <div>
-                    <div className="border-b border-cyan-500/20 p-6  space-y-1">
-                        <h2 className="text-xl font-bold "><span className="text-cyan-500">admin</span>.panel</h2>
-                        <p className="text-gray-500 text-xs">Porfolio CMS</p>
+                    <div className="border-b border-cyan-500/20 p-6 space-y-1 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold "><span className="text-cyan-500">admin</span>.panel</h2>
+                            <p className="text-gray-500 text-xs">Porfolio CMS</p>
+                        </div>
+                        <button type="button" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme" className={`cursor-pointer border border-cyan-500/20 p-2 rounded-lg ${bgThemeHover}`}>
+                            {themeMode === 'light' ? <Sun size={15}/> : <Moon size={15}/>}
+                        </button>
                     </div>
                     <div className="p-6 space-y-1 text-sm">
                         {menu.map((item) => (

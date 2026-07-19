@@ -2,9 +2,10 @@
 
 import { useTheme } from "@/app/context"
 import { TextInput, TextAreaInput } from "./components"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Nav from "./nav"
 import type { Hero } from "@/app/type"
+import type { SaveStatus } from "../type"
 import { apiClient } from "@/app/services"
 import axios from "axios"
 
@@ -17,17 +18,6 @@ type HeroPayload = {
     profile: string
     imageBG: string
     about: string
-}
-
-const defaultHeroPayload: HeroPayload = {
-    greeting: "",
-    subtitle: "",
-    description: "",
-    expStart: "",
-    email: "placeholder@example.com",
-    profile: "",
-    imageBG: "",
-    about: "",
 }
 
 const DEFAULT_HERO_EMAIL = "placeholder@example.com"
@@ -64,12 +54,17 @@ export default function Hero(){
     const [profile, setProfile] = useState<string>(heroData?.profile || "")
     const [imageBg, setImageBg] = useState<string>(heroData?.imageBG || "")
     const [isDirty, setIsDirty] = useState<boolean>(false)
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+    const [errorMessage, setErrorMessage] = useState<string>("")
+    const skipDirtyCheckRef = useRef<boolean>(true)
+    const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         if (!heroData) {
             return
         }
 
+        skipDirtyCheckRef.current = true
         setGreeting(heroData.greeting)
         setSubtitle(heroData.subtitle)
         setDescription(heroData.description)
@@ -79,13 +74,47 @@ export default function Hero(){
         setImageBg(heroData.imageBG)
         setIsDirty(false)
     }, [heroData])
-    
+
 
     useEffect(() => {
+        if (skipDirtyCheckRef.current) {
+            skipDirtyCheckRef.current = false
+            return
+        }
         setIsDirty(true)
     }, [greeting, subtitle, description, expStartDate, email, profile, imageBg])
-    
+
+    useEffect(() => {
+        function handleBeforeUnload(e: BeforeUnloadEvent) {
+            if (!isDirty) return
+            e.preventDefault()
+            e.returnValue = ""
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [isDirty])
+
+    useEffect(() => {
+        return () => {
+            if (saveStatusTimeoutRef.current) clearTimeout(saveStatusTimeoutRef.current)
+        }
+    }, [])
+
+    const validate = (): string | null => {
+        if (!greeting.trim()) return "Greeting is required."
+        if (!subtitle.trim()) return "Subtitle is required."
+        return null
+    }
+
     const handleSave = async () => {
+        const validationError = validate()
+        if (validationError) {
+            setSaveStatus("error")
+            setErrorMessage(validationError)
+            return
+        }
+
+        setSaveStatus("saving")
         try {
             const normalizedEmail = email.trim() || DEFAULT_HERO_EMAIL
 
@@ -112,13 +141,21 @@ export default function Hero(){
             setHeroData(savedHero)
             setEmail(savedHero.email)
             setIsDirty(false)
+            setSaveStatus("success")
         } catch (error) {
+            let message = "Error saving hero data. Please try again."
             if (axios.isAxiosError(error) && error.response?.status === 422) {
+                message = "Hero save validation failed. Check the fields and try again."
                 console.error("Hero save validation failed:", error.response.data)
             } else {
                 console.error("Error saving hero data:", error)
             }
+            setErrorMessage(message)
+            setSaveStatus("error")
+            return
         }
+
+        saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500)
     }
 
     if (loading) {
@@ -128,7 +165,7 @@ export default function Hero(){
 
     return (
         <div>
-            <Nav onClickSave={handleSave}/>
+            <Nav onClickSave={handleSave} saveStatus={saveStatus} errorMessage={errorMessage}/>
             <main className="p-6 text-gray-500 space-y-4">
                 <h2 className={`ml-2 ${themeFont}`}>Hero Section</h2>
                 {!heroData && (

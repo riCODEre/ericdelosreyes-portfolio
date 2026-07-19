@@ -4,9 +4,15 @@ import { useTheme } from "@/app/context"
 import { TextInput } from "./components"
 import { Plus, Trash } from "lucide-react"
 import { apiClient } from "@/app/services"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { Skill } from "@/app/type"
+import type { SaveStatus } from "../type"
 import Nav from "./nav"
+import ConfirmDialog from "./confirm-dialog"
+
+type PendingDelete =
+    | { type: "skillset"; index: number }
+    | { type: "skill"; index: number; skillIndex: number }
 
 export default function Skills(){
     const { themeMode } = useTheme()
@@ -14,6 +20,11 @@ export default function Skills(){
     const [skillsets, setSkillsets] = useState<Skill[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [isDirty, setIsDirty] = useState<boolean>(false)
+    const [isAdding, setIsAdding] = useState<boolean>(false)
+    const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+    const [errorMessage, setErrorMessage] = useState<string>("")
+    const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
+    const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         ;(async () => {
@@ -34,19 +45,36 @@ export default function Skills(){
     }
 
     const handleAddSkillset = async () => {
+        if (isAdding) return
+        setIsAdding(true)
         try {
             const response = await apiClient.post("/skills/", {
                 title: "New Skillset",
                 skillSet: [""],
             })
             setSkillsets((prev) => [...prev, response.data])
-            setIsDirty(false)
         } catch (error) {
             console.error("Error creating skillset:", error)
+        } finally {
+            setIsAdding(false)
         }
     }
 
+    const validate = (): string | null => {
+        const invalid = skillsets.some((skillset) => !skillset.title.trim())
+        if (invalid) return "Skillset title is required for every skillset."
+        return null
+    }
+
     const handleSave = async () => {
+        const validationError = validate()
+        if (validationError) {
+            setSaveStatus("error")
+            setErrorMessage(validationError)
+            return
+        }
+
+        setSaveStatus("saving")
         try {
             const updatedRows = await Promise.all(
                 skillsets.map(async (skillset: Skill & { id?: number }) => {
@@ -68,9 +96,15 @@ export default function Skills(){
 
             setSkillsets(updatedRows)
             setIsDirty(false)
+            setSaveStatus("success")
         } catch (error) {
             console.error("Error saving skillsets:", error)
+            setErrorMessage("Some skillsets may not have been saved. Please try again.")
+            setSaveStatus("error")
+            return
         }
+
+        saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500)
     }
 
     const handleDeleteSkillset = async (index: number) => {
@@ -82,7 +116,6 @@ export default function Skills(){
             }
 
             setSkillsets((prev) => prev.filter((_, i) => i !== index))
-            setIsDirty(true)
         } catch (error) {
             console.error("Error deleting skillset:", error)
         }
@@ -100,22 +133,63 @@ export default function Skills(){
         })
     }
 
+    useEffect(() => {
+        function handleBeforeUnload(e: BeforeUnloadEvent) {
+            if (!isDirty) return
+            e.preventDefault()
+            e.returnValue = ""
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [isDirty])
+
+    useEffect(() => {
+        return () => {
+            if (saveStatusTimeoutRef.current) clearTimeout(saveStatusTimeoutRef.current)
+        }
+    }, [])
+
+    const confirmDeleteTitle = pendingDelete?.type === "skillset" ? "Delete Skillset" : "Delete Skill"
+
+    const confirmDeleteMessage = pendingDelete?.type === "skillset"
+        ? "This will permanently delete this skillset and all of its skills, and cannot be undone."
+        : "This will permanently delete this skill and cannot be undone."
+
+    const handleConfirmDelete = () => {
+        if (!pendingDelete) return
+        if (pendingDelete.type === "skillset") {
+            handleDeleteSkillset(pendingDelete.index)
+        } else {
+            handleDeleteSkill(pendingDelete.index, pendingDelete.skillIndex)
+        }
+        setPendingDelete(null)
+    }
+
     if (loading) {
         return <main className="p-6 text-gray-500">Loading skills...</main>
     }
 
     return (
         <div>
-            <Nav onClickSave={handleSave}/>
+            <Nav onClickSave={handleSave} saveStatus={saveStatus} errorMessage={errorMessage}/>
+            <ConfirmDialog
+                open={pendingDelete !== null}
+                title={confirmDeleteTitle}
+                message={confirmDeleteMessage}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setPendingDelete(null)}
+            />
             <main className="p-6 text-gray-500 space-y-4">
                 <div className="flex w-full justify-between items-center">
                     <h2 className={`ml-2 ${themeFont}`}>Skills</h2>
                     <button
-                        className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2"
+                        type="button"
+                        className="flex items-center space-x-1 btn-primary rounded-lg text-sm text-black px-5 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
                         onClick={handleAddSkillset}
+                        disabled={isAdding}
                     >
                         <Plus size={15} />
-                        <span>Add</span>
+                        <span>{isAdding ? "Adding..." : "Add"}</span>
                     </button>
                 </div>
                 {skillsets.length === 0 && (
@@ -134,14 +208,21 @@ export default function Skills(){
                                 value={skillset.title}
                                 onChange={(e) => updateSkillset(key, { title: e.target.value })}
                             />
-                            <Trash size={18} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteSkillset(key)} />
+                            <button
+                                type="button"
+                                aria-label={`Delete skillset: ${skillset.title || "Untitled"}`}
+                                className="text-red-500 hover:text-red-700"
+                                onClick={() => setPendingDelete({ type: "skillset", index: key })}
+                            >
+                                <Trash size={18} />
+                            </button>
                         </div>
                         <div className="flex gap-4 flex-wrap">
                             {skillset.skillSet.map((skill, skillIndex) => (
                                 <div key={skillIndex} className="flex items-center gap-2">
                                     <TextInput
                                         inputFor={`skills-item-${key}-${skillIndex}`}
-                                        text=""
+                                        text="Skill"
                                         className="w-fit"
                                         placeholder="..."
                                         value={skill}
@@ -151,10 +232,17 @@ export default function Skills(){
                                             updateSkillset(key, { skillSet: next })
                                         }}
                                     />
-                                    <Trash size={16} className="text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteSkill(key, skillIndex)} />
+                                    <button
+                                        type="button"
+                                        aria-label={`Delete skill ${skillIndex + 1}`}
+                                        className="text-red-500 hover:text-red-700"
+                                        onClick={() => setPendingDelete({ type: "skill", index: key, skillIndex })}
+                                    >
+                                        <Trash size={16} />
+                                    </button>
                                 </div>
                             ))}
-                            <button className="flex items-center space-x-2 text-xs text-cyan-400 hover:text-cyan-700" onClick={() => handleAddSkill(key)}>
+                            <button type="button" className="flex items-center space-x-2 text-xs text-cyan-400 hover:text-cyan-700" onClick={() => handleAddSkill(key)}>
                                 <Plus size={15} className=" " />
                                 <span>Add Skill</span>
                             </button>
